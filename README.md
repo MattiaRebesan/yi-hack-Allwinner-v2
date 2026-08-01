@@ -1,324 +1,322 @@
-<p align="center">
-	<img height="200" src="https://user-images.githubusercontent.com/39277388/96489837-43d26180-1240-11eb-9d0e-5cfa84040fe1.png">
-</p>
+# yi-hack-Allwinner-v2 — y623, Home Assistant only
 
-<p align="center">
-	<a target="_blank" href="https://github.com/roleoroleo/yi-hack-Allwinner-v2/releases">
-		<img src="https://img.shields.io/github/downloads/roleoroleo/yi-hack-Allwinner-v2/total.svg" alt="Releases Downloads">
-	</a>
-</p>
+A fork of [roleoroleo/yi-hack-Allwinner-v2](https://github.com/roleoroleo/yi-hack-Allwinner-v2)
+stripped down to **one camera model (y623, "Yi Pro 2K Home")** used as a
+**stream-only source for Home Assistant**.
 
-yi-hack-Allwinner-v2 is a modification of the firmware for the Allwinner-based Yi Camera platform.
-What's the difference between v1 and v2? Allwinner-v2 is not an upgrade for Allwinner, it's a version dedicated to a different "family". Same cpu but different flash layout.
+Everything that does not serve that goal has been removed: FTP, timelapse,
+recording playback, the on-camera MQTT broker, the alternative RTSP daemons,
+micropython, proxychains. What survives exists to get one clean H.264 stream,
+ONVIF discovery, MQTT events and two-way audio into HA.
 
-## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [Installation](#installation)
-- [Contributing](#contributing-and-bug-reports)
-- [Features](#features)
-- [Performance](#performance)
-- [Supported cameras](#supported-cameras)
-- [Is my cam supported?](#is-my-cam-supported)
-- [Home Assistant integration](#home-assistant-integration)
-- [Frigate integration](#frigate-integration)
-- [Build your own firmware](#build-your-own-firmware)
-- [Unbricking](#unbricking)
-- [License](#license)
-- [Disclaimer](#disclaimer)
-- [Donation](#donation)
+> **Wrong camera?** This build packs `y623` only and the other 19 models have
+> been deleted from `sysroot/`, `sdhack/` and `unbrick/`. If your camera is not
+> a y623 on firmware `12.0.51*` with an `RFUS` / `YFUS` / `ZFUS` serial, use
+> [upstream](https://github.com/roleoroleo/yi-hack-Allwinner-v2) instead.
 
-
-## Installation
-
-### Backup
-It's not easy to brick the cam but it can happen.
-So please, make your backup copy: https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Dump-your-backup-firmware-(SD-card)
-
-Anyway, the hack procedure will create a backup for you.
-
-### Install Procedure
-If you want to use the original Yi app, please install it and complete the pairing process before installing the hack.
-
-Otherwise, check setep 4.
-
-1. Format an SD Card as FAT32. It's recommended to format the card in the camera using the camera's native format function. If the card is already formatted, remove all the files.
-2. Download the latest release from the Releases page.
-3. Extract the contents of the archive to the root of your SD card. Your card should appear with this structure:
-```
-|-- Factory/
-|-- yi-hack/
-|-- lower_half_init.sh
-```
-4. (Optional) If you want to set wifi credentials, rename the file Factory/configure_wifi.cfg.ori to Factory/configure_wifi.cfg and edit the file with your username and password.
-5. Insert the SD Card and reboot the camera
-6. Wait a minute for the camera to update.
-7. Check the hack opening the web interface http://IP-CAM (where IP-CAM is the IP address of the cam assigned by your router).
-8. Don't remove the microSD card (yes this hack requires a dedicated microSD card).
-9. Check the FAQ if you have a problem: https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/FAQ
-
-
-### Online Update Procedure
-1. Go to the "Maintenance" web page
-2. Check if a new release is available
-3. Click "Upgrade Firmware"
-4. Wait for cam reboot
-
-
-### Manual Update Procedure
-Check the wiki: https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Manual-firmware-upgrade
-
-
-### Optional Utilities 
-Several [optional utilities](https://github.com/roleoroleo/yi-hack-utils) are avaiable, some supporting experimental features like text-to-speech.
-
-
-## Contributing and Bug Reports
-See [CONTRIBUTING](CONTRIBUTING.md)
+Read [NOT-DONE.md](NOT-DONE.md) before proposing a cut. It records what was
+deliberately *not* removed and why — several obvious-looking cuts turn out to
+break things, and a few are impossible in the first place.
 
 ---
 
-## Features
-This custom firmware contains features replicated from the [yi-hack-MStar](https://github.com/roleoroleo/yi-hack-MStar) project and similar to the [yi-hack-v4](https://github.com/TheCrypt0/yi-hack-v4) project.
+## Contents
 
-- FEATURES
-  - RTSP server - allows a RTSP stream of the video (high and/or low resolution) and audio (thanks to @PieVo for the work on MStar platform).
-    - rtsp://IP-CAM/ch0_0.h264             (high res)
-    - rtsp://IP-CAM/ch0_1.h264             (low res)
-    - rtsp://IP-CAM/ch0_2.h264             (only audio)
-  - ONVIF server (with support for stream, snapshot, ptz, presets, events and WS-Discovery) - standardized interfaces for IP cameras.
-  - Snapshot service - allows to get a jpg with a web request.
-    - http://IP-CAM/cgi-bin/snapshot.sh?res=low&watermark=yes        (select resolution: low or high, and watermark: yes or no)
-    - http://IP-CAM/cgi-bin/snapshot.sh                              (default high without watermark)
-  - Timelapse feature
-  - MQTT events - Motion detection and baby crying detection through mqtt protocol.
-  - MQTT configuration
-  - TLS support for MQTT
-  - Web server - web configuration interface.
-  - SSH server - dropbear.
-  - Telnet server - busybox.
-  - FTP server.
-  - FTP push: export mp4 video to an FTP server (thanks to @Catfriend1).
-  - Authentication for HTTP, RTSP and ONVIF server.
-  - Proxychains-ng - Disabled by default. Useful if the camera is region locked.
-  - The possibility to change some camera settings (copied from official app):
-    - camera on/off
-    - video saving mode
-    - detection sensitivity
-    - motion detections (it depends on your cam and your plan)
-    - baby crying detection
-    - status led
-    - ir led
-    - rotate
-    - ...
-  - Management of motion detect events and videos through a web page.
-  - View recorded video through a web page (thanks to @BenjaminFaal).
-  - PTZ support through a web page (if the cam supports it).
-  - PTZ presets.
-  - The possibility to disable all the cloud features.
-  - Swap File on SD.
-  - Online firmware upgrade.
-  - Load/save/reset configuration.
+- [Security defaults that differ from upstream](#security-defaults-that-differ-from-upstream)
+- [What is still here](#what-is-still-here)
+- [What was removed](#what-was-removed)
+- [Home Assistant setup](#home-assistant-setup)
+- [What you cannot change from here](#what-you-cannot-change-from-here)
+- [Install and flash](#install-and-flash)
+- [Verify a running camera](#verify-a-running-camera)
+- [Build](#build)
+- [Recovery](#recovery)
+- [Upstream, license, credit](#upstream-license-credit)
 
+---
 
-## Performance
+## Security defaults that differ from upstream
 
-The performance of the cam is not so good (CPU, RAM, etc...). Low ram is the bigger problem.
-If you enable all the services you may have some problems.
-For example, enabling snapshots may cause frequent reboots.
-So, **enable swap file** even if this will waste the sd
+| Key / setting | Upstream | Here | Why |
+|---|---|---|---|
+| `TELNETD` | `yes` | `no` | Plaintext root shell on port 23, on by default. Nothing needs it; dropbear covers shell access. |
+| `DISABLE_CLOUD` | `no` | `yes` | Stops the Yi cloud phone-home (`p2p_tnp`, `oss*`, `rtmp`) and installs the hosts/route blacklist. `rmm` and `start_buffer` still run, so the stream is unaffected. |
+| `dropbear` flags | `-R -B -p 0.0.0.0:22` | `-R -p 0.0.0.0:22` | `-B` is dropbear's *allow blank password logins*. With `SSH_PASSWORD` empty by default, upstream ships **root SSH with no password on the LAN**. |
 
+Two consequences worth knowing before you flash:
 
-## Supported cameras
+**SSH refuses every login until you set a password.** Removing `-B` means an
+empty `SSH_PASSWORD` no longer means "let anyone in", it means "let nobody in".
+Set `SSH_PASSWORD` in `yi-hack/etc/system.conf` on the card (or in the web UI)
+if you want a shell. `system.sh` logs a line saying so at boot rather than
+letting it look like sshd is broken.
 
-Currently this project supports only the following cameras:
+**HTTP is still unauthenticated, on purpose.** `USERNAME` and `PASSWORD` are
+empty, so `/tmp/httpd.conf` is never written and port 80 has no password —
+anything on the LAN can reach `/cgi-bin/reset.sh`, `reboot.sh`, `save.sh`,
+`speak.sh` and `load.sh`. That is a deliberate owner decision, documented with
+its reasoning in [NOT-DONE.md](NOT-DONE.md#http-authentication--left-off-deliberately).
+Put the camera on a VLAN that only Home Assistant can reach.
 
-| Camera | SN prefix | Firmware | File prefix | Remarks |
-| --- | --- | --- | --- | --- |
-| Yi 1080p Home | BFUS - IFUS - RFUS | 9.0.19* | y21ga | - |
-| Yi 1080p Home | BFUS - IFUS - RFUS | 12.1.19* | y21ga | - |
-| Yi 1080p Home | IFUS - QFUS - RFUS | 9.0.36* | y211ga | - |
-| Yi 1080p Home | IFUS - QFUS - RFUS | 12.0.37* | y211ga | - |
-| Yi 1080p Home | IFUS - QFUS - RFUS | 12.1.37* | y211ga | - |
-| Yi 1080p Home | QFUS - RFUS | 9.0.35* | y291ga | - |
-| Yi 1080p Home | QFUS - RFUS | 12.0.35* | y291ga | - |
-| Yi Outdoor 1080p | IFUS - RFUS | 9.0.26* | h30ga | - |
-| Yi Outdoor 1080p | IFUS - RFUS | 11.1.26* | h30ga | - |
-| Yi 1080p Dome | *FUS | 9.0.05* | r30gb | beta version (check this issue https://github.com/roleoroleo/yi-hack-Allwinner-v2/issues/484) |
-| Yi 1080p Dome | *FUS | 12.1.05* | r30gb | beta version (check this issue https://github.com/roleoroleo/yi-hack-Allwinner-v2/issues/484) |
-| Yi Dome Guard | YRS | 9.0.05* | r30gb | beta version (check this issue https://github.com/roleoroleo/yi-hack-Allwinner-v2/issues/484) |
-| Yi Dome Camera U (Full HD) | BFUS - SFUS | 9.0.22* | h52ga | - |
-| Yi Dome Camera U (2K) | BFUS - SFUS | 9.0.21* | h51ga | - |
-| Yi Dome U Pro 2K | LFUS | 9.0.27* | h60ga | - |
-| Yi Outdoor 1080p | QFUS | 9.0.45* | r40ga | - |
-| Yi Home Y4 | IFCN | 9.0.09* | y29ga | - |
-| Yi Dome Guard | QFUS | 9.0.46* | r35gb | - |
-| Yi Dome Guard | QFUS | 12.1.47* | r35gb | - |
-| Yi Dome Guard | YRS | 9.0.46* | r35gb | - |
-| Yi Dome Guard | YRS | 12.1.47* | r35gb | - |
-| Yi Pro 2K Home | RFUS - YFUS - ZFUS | 12.0.51* | y623 | - |
-| Kami mini home | IFUS | 9.0.20* | y28ga | - |
-| MIBAO G1 1296p dome | - | 9.0.04* | qg311r | - |
-| BLITZWOLF BW-YIC1 | - | 9.0.41* | b091qp | - |
-| ESCAM PT202 | - | 9.0.41* | b091qp | https://github.com/roleoroleo/yi-hack-Allwinner-v2/discussions/624#discussioncomment-5816561 |
-| YS-QC-02 | - | 9.0.41* | b091qp | https://github.com/roleoroleo/yi-hack_ha_integration/issues/84 |
-| Flood Light Camera Outdoor L850Y-US | - | 9.0.41* | b091qp | - |
-| Tovendor Mini Smart Home Camera | - | 9.0.41* | b091qp | - |
+Setting `USERNAME`/`PASSWORD` closes it — but note upstream drives web, RTSP
+*and* ONVIF auth from the same pair (`system.sh:153-162`), so switching it on
+means updating Home Assistant in three places or the camera goes dark.
 
-USE AT YOUR OWN RISK.
+---
 
-**Do not try to use a fw on an unlisted model**
+## What is still here
 
-**Do not try to force the fw loading renaming the files**
+| Component | Role |
+|---|---|
+| `rRTSPServer` + `h264grabber` | The stream. `rtsp://<ip>:554/ch0_0.h264` |
+| `onvif_simple_server` | ONVIF device/media/PTZ/events + WS-Discovery — how HA and Frigate find the camera |
+| `snapshot` (`imggrabber`) | JPEG stills for the ONVIF snapurl and HA camera entities |
+| `mqtt` / `mqttv4` / `mqtt-config` / wolfSSL | MQTT auto-discovery and event publishing. **This is the HA integration.** |
+| `ipc_cmd` | IR / status LED / PTZ / detection toggles, surfaced as HA switches |
+| `alsa-lib` + `speaker` + `pcmvol` | Two-way audio and TTS from HA |
+| `www` + `proccgi` + `jq` | Config UI. Cannot be removed — ONVIF's snapurl points at `cgi-bin/snapshot.sh`. |
+| `busybox` | httpd, ntpd, crond, coreutils |
+| `dropbear` | SSH |
+| `mdnsd`, `set_tz_offset`, `static` | Discovery, timezone, all config and boot scripts |
 
+## What was removed
 
-## Is my cam supported?
+- **19 camera models** — `sysroot/`, `sdhack/`, `unbrick/`, and the `CAMERAS`
+  array in `scripts/common.sh`
+- **FTP entirely** — pure-ftpd, busybox `ftpd`/`ftpget`/`ftpput`/`tcpsvd`,
+  `ftppush.sh`, all `FTP_*` keys. Port 21 is closed by construction, not by
+  config.
+- **`sftp-server`** — pulled the whole `openssh-portable` submodule to fetch
+  recordings that no longer exist. `DROPBEAR_SFTPSERVER 0` in `localoptions.h`.
+- **Recording playback** — the `eventsdir`/`eventsfile` pages, their modules,
+  4 CGIs, `getlastrecordedvideo.sh`, and the `/tmp/sd/record` → `www/record`
+  bind mount (which was an unauthenticated read of the whole card over HTTP).
+- **Timelapse** — `minimp4`, `mjpeg-avi`, `create_avi.sh`. Recording thumbnails
+  went with them (`thumb.sh` needed `minimp4_yi`).
+- **`go2rtc`** — redundant. Home Assistant has shipped its own since 2024.11.
+- **`rtsp_server_yi`** — alternative RTSP daemon, unused at `RTSP_ALT=standard`.
+- **`mosquitto`** — on-camera broker. HA owns the broker.
+- **`micropython`** — no consumers anywhere in `src/static` or `src/www`.
+- **`proxychains-ng`** — disabled by default; a cloud-region-lock workaround.
 
-If you want to know if your cam is supported, please check the serial number (first 4 letters) and the firmware version.
-If both numbers appear in the same row in the table above, your cam is supported.
-If not, check the other projects related to Yi cams:
-- https://github.com/TheCrypt0/yi-hack-v4 and previous
-- https://github.com/alienatedsec/yi-hack-v5
-- https://github.com/roleoroleo/yi-hack-MStar
-- https://github.com/roleoroleo/yi-hack-Allwinner
+Six of nine git submodules are gone, which is most of the clone time.
 
+---
 
-## Home Assistant integration
-Are you using Home Assistant? Do you want to integrate your cam? Try these custom integrations:
-- https://github.com/roleoroleo/yi-hack_ha_integration
-- https://github.com/AlexxIT/WebRTC
+## Home Assistant setup
 
-You can also use the [web services](https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Web-services-description) in Home Assistant -- here's one way to do that. (This example requires the nanotts optional utility to be installed on the camera.) Set up a rest_command in your configuration.yaml to call one of the [web services](https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Web-services-description). 
+### Stream
+
+Point HA's built-in go2rtc straight at the camera. Do **not** put ffmpeg or a
+transcode in front of it — the whole point is that nothing re-encodes.
+
+```yaml
+# configuration.yaml
+go2rtc:
+  streams:
+    yi_pro_2k: rtsp://192.168.1.20:554/ch0_0.h264#backchannel=0
 ```
+
+`#backchannel=0` stops go2rtc negotiating the ONVIF backchannel on the view
+stream. Leave it off unless you actually want two-way audio on that stream, in
+which case add a second entry without the flag.
+
+**Use WebRTC, not HLS, for the live card.** That is the difference between
+~2 s and sub-second latency, and it dwarfs anything you can change on the
+camera side.
+
+Available URLs:
+
+| URL | Contents |
+|---|---|
+| `rtsp://<ip>:554/ch0_0.h264` | high res, video + audio |
+| `rtsp://<ip>:554/ch0_1.h264` | low res |
+| `rtsp://<ip>:554/ch0_2.h264` | audio only |
+
+### Audio
+
+`RTSP_AUDIO` is set to `aac` here, not upstream's `yes`. Upstream's `yes` maps
+to `convertTo = WA_PCMU` (`rRTSPServer.cpp:1137`), meaning the camera decodes
+the AAC its own encoder produced and re-encodes it to G.711 on every frame.
+`aac` is passthrough: less CPU on the camera, and one fewer transcode in HA,
+which takes AAC natively.
+
+### Snapshots
+
+```
+http://<ip>/cgi-bin/snapshot.sh                        high res, no watermark
+http://<ip>/cgi-bin/snapshot.sh?res=low&watermark=yes
+```
+
+Snapshots are memory-hungry on this SoC. Don't poll them on a short interval.
+
+### ONVIF
+
+Endpoint `http://<ip>/onvif/device_service`, port 80. Discovery, PTZ and
+motion events all work. Auth is off (see above), so leave user/password empty
+in the HA ONVIF integration and in Frigate.
+
+### MQTT
+
+`MQTT` is left at `no` by default — the shipped `mqttv4.conf` has
+`MQTT_IP=0.0.0.0`, so enabling it out of the box just gives you a retry loop.
+Set your broker's IP in the web UI's MQTT page, *then* turn MQTT on. Entities
+appear in HA via auto-discovery.
+
+### Speak / TTS
+
+```yaml
 rest_command:
   camera_announce:
-    url: http://[camera address]/cgi-bin/speak.sh?lang={{language}}&voldb={{volume}}
+    url: http://192.168.1.20/cgi-bin/speak.sh?lang={{language}}&voldb={{volume}}
     method: POST
     payload: "{{message}}"
 ```
-Create an automation and use yaml in the action to send data to the web service. 
-```
-service: rest_command.camera_announce
-data:
-  language: en-US
-  message: "All your base are belong to us."
-  volume: '-8'
-``` 
 
-## Frigate integration
+Requires the `nanotts` optional utility on the camera
+([yi-hack-utils](https://github.com/roleoroleo/yi-hack-utils)).
 
-Frigate can consume the RTSP streams directly. Enable the RTSP server in the camera web interface and use one of these stream URLs:
+---
 
-- `rtsp://IP-CAM/ch0_0.h264` - high resolution
-- `rtsp://IP-CAM/ch0_1.h264` - low resolution
-- `rtsp://IP-CAM/ch0_2.h264` - audio only
+## What you cannot change from here
 
-For a minimal setup, use the low resolution stream for detection to reduce load on the camera:
+`rRTSPServer` **does not encode.** Its entire CLI is `-m -r -a -b -p -s -u -w -d`
+(`rRTSPServer.cpp:957-976`) — no bitrate, no framerate, no keyframe interval.
+It relays H.264 that the *stock Yi firmware* encoder has already written to
+shared memory.
 
-```yaml
-cameras:
-  yi_camera:
-    ffmpeg:
-      inputs:
-        - path: rtsp://IP-CAM/ch0_1.h264
-          roles:
-            - detect
-```
+**No change in this repository can raise stream quality.** Encoder settings
+live in the stock firmware, reachable only through `camera.conf`, `ipc_cmd` or
+the Yi app. "Faster" in this project means freeing the SoC — fewer daemons,
+fewer SD writes, no needless transcode — not tuning the encoder.
 
-If you need a higher quality stream for recording, add the high resolution stream as a separate input:
+Free RAM on this build is ~12.3 MB of 59.5 MB at 5 min uptime, against
+10.9 MB on the unmodified hack. `SWAP_FILE=yes` stays on: swapping to SD is
+slow, but a `h264grabber` killed by the OOM reaper is slower.
 
-```yaml
-cameras:
-  yi_camera:
-    ffmpeg:
-      inputs:
-        - path: rtsp://IP-CAM/ch0_1.h264
-          roles:
-            - detect
-        - path: rtsp://IP-CAM/ch0_0.h264
-          roles:
-            - record
-```
+---
 
-If authentication is enabled in the camera web interface, include the configured username and password in the RTSP URL:
+## Install and flash
 
-```yaml
-path: rtsp://user:password@IP-CAM/ch0_1.h264
-```
+The card is the firmware — this hack runs entirely from the microSD and the
+camera's NAND is never written. The card is dedicated to the camera; don't
+also use it for storage.
 
-### PTZ through ONVIF
+**First install**, on a freshly FAT32-formatted card (format it in the camera
+if you can):
 
-For models with PTZ support, enable the ONVIF server in the camera web interface and add an `onvif` section to the Frigate camera configuration. The ONVIF port is the camera HTTP port, usually `80` unless you changed it.
+1. Download the newest `y623_*.tgz` from Actions, or build one (below).
+2. Extract it to the root of the card. The result must look like:
+   ```
+   |-- Factory/
+   |-- yi-hack/
+   |-- lower_half_init.sh
+   ```
+3. Optional: `cp Factory/configure_wifi.cfg.ori Factory/configure_wifi.cfg` and
+   put your SSID and PSK in it.
+4. Insert the card, power on, wait ~60 s, open `http://<ip>`.
 
-```yaml
-cameras:
-  yi_ptz_camera:
-    ffmpeg:
-      inputs:
-        - path: rtsp://IP-CAM/ch0_1.h264
-          roles:
-            - detect
-    onvif:
-      host: IP-CAM
-      port: 80
-      user: ""
-      password: ""
+**Every flash after that**, use the script — never Finder, never Archive
+Utility. A Finder copy of the payload bricked this camera once by silently
+producing a partial tree, after which `lower_half_init.sh` ran nothing.
+
+```bash
+scripts/flash-sd.sh                        # newest successful CI build
+scripts/flash-sd.sh --run <id>             # a specific workflow run
+scripts/flash-sd.sh --tgz path/to.tgz      # a local build
+scripts/flash-sd.sh --volume /Volumes/X    # pick the card explicitly
+scripts/flash-sd.sh --yes                  # no confirmation prompt
 ```
 
-If ONVIF authentication is enabled, replace the empty strings with the camera credentials. If ONVIF authentication is disabled, keep `user: ""` and `password: ""`; some Frigate versions expect these keys even when the camera allows anonymous ONVIF access.
+It backs the card up to `~/yihack-backups/` first, wipes the old `yi-hack`
+tree, extracts the new one, and carries your settings across.
 
-Frigate shows PTZ controls only when its ONVIF connection succeeds and the camera model exposes PTZ commands. Not all supported cameras have PTZ hardware.
+> **Your `system.conf` wins over new defaults.** The script *merges* rather
+> than copies: for every key the new build still defines, **your card's value
+> is kept**. Right for `WIFI_*`, `TZ` and passwords — surprising for hardening.
+> Flash a build that changes `TELNETD=yes` → `no` onto a card that already says
+> `yes` and the card wins.
+>
+> The script prints every such key:
+>
+> ```
+>     kept your value, build default differs:
+>       TELNETD=yes   build default: no
+>       RTSP_AUDIO=yes   build default: aac
+> ```
+>
+> **Act on that list by hand** — edit `yi-hack/etc/system.conf` on the card, or
+> change it in the web UI. Nothing else will apply those defaults for you.
+> More on this in [NOT-DONE.md](NOT-DONE.md#changed-defaults-do-not-reach-a-card-that-already-has-the-key).
 
-### Notes
+## Verify a running camera
 
-- These cameras have limited CPU and RAM. Avoid enabling more camera-side services than needed.
-- If the camera becomes unstable, enable the swap file and prefer a single low resolution stream for detection.
-- Snapshots and multiple simultaneous streams may increase memory pressure.
+```bash
+scripts/flash-sd.sh --verify 192.168.1.20
+```
 
-## Telegram Control System
+Checks `status.json`, the snapshot CGI, the ONVIF endpoint, and probes the
+RTSP stream with `ffprobe` if you have it (`brew install ffmpeg`). It touches
+no card and flashes nothing.
 
-A complete remote surveillance and control system: control your camera, receive automatic alerts, and communicate bidirectionally — all through a Telegram bot.
-Features
-	- On-demand snapshot and video recording via Telegram commands
-	- Automatic motion alerts with photo
-	- Automatic sound alerts with snapshot + 15s audio clip
-	- Bidirectional voice intercom — speak through Telegram, hear through the camera speaker
-	- Blue LED control — turn on/off remotely
-	- Infrared control — turn on/off remotely
-	- Silent mode — suppress notifications without stopping the watchers
-	- System status — IP, uptime, memory, process PIDs
-	- Remote reboot
-[Get scripts here](https://github.com/tingolinchi/yi-home-telegram).
+```
+==> Checking camera at 192.168.1.20
+  status.json  OK
+    "fw_version": "0.3.6", "model_suffix": "y623", ...
+  snapshot     OK (74213 bytes)
+  onvif        OK
+  rtsp         OK (h264,2304,1296)
+==> All checks passed.
+```
 
-## Build your own firmware
+After a hardening flash also confirm, by hand: `ssh` is refused (or accepts
+your new password), `telnet <ip>` is refused, and `netstat -tlnp` on the camera
+shows no listener you did not expect.
 
-If you want to build your own firmware, clone this git and compile using a linux machine. Quick explanation:
+## Build
 
-1. Download and install the SDK as described [here](https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Build-your-own-firmware)
-2. Clone this git: `git clone https://github.com/roleoroleo/yi-hack-Allwinner-v2`
-3. Init modules: `git submodule update --init`
-4. Compile: `./scripts/compile.sh`
-5. Pack the firmware: `./scripts/pack_fw.all.sh`
+**Via GitHub Actions** (easiest, free on public repos, ~7-8 min):
 
-Instead of installing the SDK on your host machine, there's also the option to use a [`devcontainer`](https://code.visualstudio.com/docs/remote/containers) from within [Visual Studio Code](https://code.visualstudio.com/). Please ensure you have the [`Remote - Containers`](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed for this to work.
+Push to `y623-ha`, or trigger the workflow manually — `.github/workflows/build.yaml`
+has `workflow_dispatch`. It runs `scripts/compile.sh` then `scripts/pack_fw.sh y623`
+and uploads the `.tgz` as the `build` artifact. `scripts/flash-sd.sh` downloads
+it for you.
 
+**Locally**, if you'd rather not wait on CI:
 
-## Unbricking
+```bash
+colima start --vm-type=vz --vz-rosetta --cpu 4 --memory 8 --disk 60
+scripts/build-local.sh
+```
 
-If your camera doesn't start, no panic. This hack is not a permanent change, remove your SD card and the cam will come back to the original state.
-If the camera still won't start, try the "Unbrick the cam" procedure https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Unbrick-the-cam.
+`build-local.sh` builds the `Dockerfile` (the same toolchain image CI uses) and
+runs the compile inside it. Colima with `vz` + Rosetta is what makes the
+`x86_64` toolchain usable at a reasonable speed on Apple silicon.
 
-----
+## Recovery
 
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+There is no brick this hack can cause that pulling the card does not fix. The
+camera reverts to stock firmware the moment the card is absent or the payload
+is unreadable.
 
-## DISCLAIMER
-**NOBODY BUT YOU IS RESPONSIBLE FOR ANY USE OR DAMAGE THIS SOFTWARE MAY CAUSE. THIS IS INTENDED FOR EDUCATIONAL PURPOSES ONLY. USE AT YOUR OWN RISK.**
+To fix a bad config without reflashing, mount the card and edit
+`yi-hack/etc/system.conf` directly. To roll a stage back, reflash the previous
+`.tgz` you kept — `scripts/flash-sd.sh --tgz <path>`.
 
-## Donation
-If you like this project, you can buy roleo a beer :)
+If the camera won't start even with the card removed, that is a genuine brick
+and unrelated to this repo:
+[Unbrick the cam](https://github.com/roleoroleo/yi-hack-Allwinner-v2/wiki/Unbrick-the-cam).
 
-Click [here](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JBYXDMR24FW7U&currency_code=EUR&source=url) or use the below QR code to donate via PayPal
-<p align="center">
-  <img src="https://github.com/roleoroleo/yi-hack-Allwinner-v2/assets/39277388/37ff6496-0903-4633-b203-9569b28e0f1c"/>
-</p>
+## Upstream, license, credit
+
+Sync procedure and the list of files that will conflict: [UPSTREAM.md](UPSTREAM.md).
+
+All of the hard work here is [roleoroleo](https://github.com/roleoroleo)'s, plus
+the contributors to yi-hack-MStar and yi-hack-v4 whose work it builds on. This
+fork only deletes things. If you find it useful, go
+[buy roleo a beer](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JBYXDMR24FW7U&currency_code=EUR&source=url).
+
+[MIT](LICENSE), same as upstream.
+
+**NOBODY BUT YOU IS RESPONSIBLE FOR ANY USE OR DAMAGE THIS SOFTWARE MAY CAUSE.
+THIS IS INTENDED FOR EDUCATIONAL PURPOSES ONLY. USE AT YOUR OWN RISK.**
