@@ -6,10 +6,10 @@ MQTTV4_CONF_FILE="/tmp/sd/yi-hack/etc/mqttv4.conf"
 
 PARMS1="
 HTTPD=yes
-TELNETD=yes
+TELNETD=no
 SSHD=yes
 MDNSD=yes
-DISABLE_CLOUD=no
+DISABLE_CLOUD=yes
 REC_WITHOUT_CLOUD=no
 MQTT=no
 RTSP=yes

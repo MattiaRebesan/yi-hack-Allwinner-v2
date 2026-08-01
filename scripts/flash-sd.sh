@@ -246,7 +246,7 @@ for line in open(new_path):
         k, _, v = stripped.partition("=")
         if k in old and old[k] != v:
             lines.append(f"{k}={old[k]}\n")
-            carried.append(k)
+            carried.append((k, old[k], v))
             continue
     lines.append(line)
 
@@ -254,8 +254,13 @@ new_keys = {l.partition("=")[0] for l in lines if "=" in l and not l.startswith(
 dropped = sorted(set(old) - new_keys)
 
 open(new_path, "w").writelines(lines)
+# Your value always wins, but show what the build wanted. Otherwise a hardened
+# default silently loses to whatever the card happened to be carrying, and you
+# think you flashed a change that never took effect.
 if carried:
-    print("    carried over: " + ", ".join(sorted(carried)))
+    print("    kept your value, build default differs:")
+    for k, mine, default in sorted(carried):
+        print(f"      {k}={mine or '(empty)'}   build default: {default or '(empty)'}")
 if dropped:
     print("    dropped (no longer used): " + ", ".join(dropped))
 PY

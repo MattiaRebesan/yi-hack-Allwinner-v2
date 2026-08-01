@@ -24,7 +24,6 @@ cd "${BUILD_FOLDER}"
     RANLIB=arm-openwrt-linux-ranlib \
     --host=arm \
     --disable-zlib \
-    --disable-harden \
     --disable-syslog \
     || exit 1
 

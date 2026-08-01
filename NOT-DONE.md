@@ -39,6 +39,39 @@ is the stream dying. The cron is now the only backstop, so it stays.
 
 ---
 
+## Things the owner decided against
+
+### HTTP authentication — left off, deliberately
+
+**Proposed (Stage 3):** stop `httpd` serving unauthenticated, either by
+refusing to start with an empty `USERNAME` or by generating a password on
+first boot.
+
+**Why not:** owner's call, made with the exposure spelled out. Port 80 has no
+password, so anything on the LAN can reach `/cgi-bin/reset.sh` (factory
+reset), `reboot.sh`, `save.sh` (rewrite any config), `speak.sh` (talk through
+the speaker) and `load.sh` (read config back).
+
+Worth knowing if that changes: upstream drives web, RTSP and ONVIF auth from
+the *same* `USERNAME`/`PASSWORD` pair (`system.sh:153-162`), so switching it on
+also puts credentials in front of the RTSP URL and the ONVIF integration —
+Home Assistant needs updating in three places or the camera goes dark. The
+`auth.patch` in `src/busybox/` makes a `path::` line mean "no auth for this
+path", which is how `/onvif::` stays open, so a narrower policy that protects
+only the mutating CGIs is possible if this is ever revisited.
+
+### `MQTT=yes` as a default — left at `no`
+
+**Proposed (Stage 3):** default MQTT on, since HA is the point.
+
+**Why not:** the shipped `mqttv4.conf` has `MQTT_IP=0.0.0.0`. Turning the
+daemon on by default just gives every fresh install a connection-retry loop
+against a broker address that cannot work. MQTT is one checkbox in the web UI
+once you know your broker's IP. Enabling a daemon that is guaranteed to fail
+is not a better default than leaving it off.
+
+---
+
 ## Things that are not actually possible here
 
 ### Raising stream bitrate / fps / GOP
@@ -120,6 +153,18 @@ deleted keeps that key forever.
 Harmless — nothing reads them — and `scripts/flash-sd.sh` merges rather than
 copies `system.conf`, so a flash through that script does drop them. Worth
 knowing if you ever hand-edit a card.
+
+### Changed defaults do not reach a card that already has the key
+
+`scripts/flash-sd.sh` merges `system.conf` by keeping **your** value for every
+key the new build still defines. That is right for `WIFI_*`, `TZ` and
+passwords, and wrong-feeling for hardening: flash a build that changes
+`TELNETD=yes` → `no` onto a card that already says `yes`, and the card wins.
+
+Not changed — silently overwriting settings on a flash is worse. Instead the
+script now prints every such key as `kept your value, build default differs`,
+so a default that did not take effect is visible rather than assumed. Act on
+that list by hand.
 
 ### Recording thumbnails and timelapse are gone as collateral
 

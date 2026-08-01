@@ -312,7 +312,14 @@ if [[ $(get_config SSHD) == "yes" ]] ; then
 #    mkdir -p /etc/dropbear
 #    cp -f $SONOFF_HACK_PREFIX/etc/dropbear/* /etc/dropbear/
     chmod 0600 $YI_HACK_PREFIX/etc/dropbear/*
-    dropbear -R -B -p 0.0.0.0:22
+    # No -B: that is dropbear's "allow blank password logins" flag, and with
+    # SSH_PASSWORD empty it means root over the LAN with no password at all.
+    # Without a password set, dropbear now refuses every login, so say so
+    # rather than let it look like SSH is broken.
+    if [[ x$(get_config SSH_PASSWORD) == "x" ]] ; then
+        log "SSH_PASSWORD is empty: sshd will refuse all logins. Set it in system.conf."
+    fi
+    dropbear -R -p 0.0.0.0:22
 fi
 
 if [[ $(get_config NTPD) == "yes" ]] ; then
