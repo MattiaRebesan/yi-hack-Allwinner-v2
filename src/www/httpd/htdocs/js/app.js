@@ -128,7 +128,7 @@ function saveView(view) {
         } else {
             toast('Applied');
         }
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 /* --------------------------------------------------------------- router */
@@ -151,18 +151,18 @@ function route() {
         stopStatus();
     }
     if (name === 'stream') {
-        loadConf('system').catch(fail);
+        loadConf('system')['catch'](fail);
     }
     if (name === 'camera') {
         loadCamera();
     }
     if (name === 'ha') {
-        loadConf('system').catch(fail);
-        loadConf('mqtt').catch(fail);
-        loadConf('mqtt_advertise').catch(fail);
+        loadConf('system')['catch'](fail);
+        loadConf('mqtt')['catch'](fail);
+        loadConf('mqtt_advertise')['catch'](fail);
     }
     if (name === 'system') {
-        loadConf('system').catch(fail);
+        loadConf('system')['catch'](fail);
         loadTz();
     }
 }
@@ -211,7 +211,7 @@ function refreshStatus() {
         text('#s-gw', s.gateway);
         text('#s-mac', s.mac_addr);
         text('#s-wifi', s.wlan_essid ? s.wlan_essid + ' (' + s.wlan_strength + ')' : '-');
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 function refreshLinks() {
@@ -224,7 +224,7 @@ function refreshLinks() {
         if (l.high_res_snapshot) { $('#u-snap-high').href = l.high_res_snapshot; }
         if (l.low_res_snapshot) { $('#u-snap-low').href = l.low_res_snapshot; }
         buildGo2rtc(l);
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 function buildGo2rtc(l) {
@@ -248,7 +248,7 @@ function takeSnapshot() {
         .then(function (b64) {
             img.src = 'data:image/jpeg;base64,' + b64;
             img.hidden = false;
-        }).catch(fail);
+        })['catch'](fail);
 }
 
 /* --------------------------------------------------------------- camera */
@@ -267,7 +267,7 @@ function loadCamera() {
         var fw12 = (hv === '11' || hv === '12');
         $$('.fw12').forEach(function (el) { el.hidden = !fw12; });
         $$('.no-fw12').forEach(function (el) { el.hidden = fw12; });
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 /* Motion detection and the AI detectors are mutually exclusive downstream. */
@@ -316,7 +316,7 @@ function speak() {
           '&voldb=' + encodeURIComponent($('#tts-vol').value),
           { method: 'POST', body: t })
         .then(function () { toast('Sent to the speaker'); })
-        .catch(fail);
+        ['catch'](fail);
 }
 
 function playWav() {
@@ -330,7 +330,7 @@ function playWav() {
     fetch('cgi-bin/speaker.sh?voldb=' + encodeURIComponent($('#wav-vol').value),
           { method: 'POST', body: fd })
         .then(function () { toast('Sent to the speaker'); })
-        .catch(fail);
+        ['catch'](fail);
 }
 
 /* ----------------------------------------------------------------- wifi */
@@ -352,7 +352,7 @@ function scanWifi() {
         });
         sel.innerHTML = html + '<option value="__other">Other...</option>';
         toggleWifiManual();
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 function toggleWifiManual() {
@@ -381,7 +381,7 @@ function saveWifi() {
                 throw new Error('The camera refused those Wi-Fi settings');
             }
             needsReboot('Wi-Fi credentials');
-        }).catch(fail);
+        })['catch'](fail);
 }
 
 /* ---------------------------------------------------------- maintenance */
@@ -398,7 +398,7 @@ function backup() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 function restore() {
@@ -425,7 +425,7 @@ function restore() {
             throw new Error('The camera could not unpack that backup');
         }
         needsReboot('The backup');
-    }).catch(fail);
+    })['catch'](fail);
 }
 
 function waitForCamera() {
@@ -435,7 +435,7 @@ function waitForCamera() {
     setInterval(function () {
         fetch('index.html', { cache: 'no-store' }).then(function () {
             location.reload();
-        }).catch(function () { /* still down */ });
+        })['catch'](function () { /* still down */ });
     }, 5000);
 }
 
@@ -444,7 +444,7 @@ function reboot() {
         return;
     }
     /* The connection dies with the daemon, so a rejected fetch is expected. */
-    fetch('cgi-bin/reboot.sh').catch(function () { });
+    fetch('cgi-bin/reboot.sh')['catch'](function () { });
     waitForCamera();
 }
 
@@ -452,7 +452,7 @@ function factoryReset() {
     if (!confirm('Reset every yi-hack setting to its default, Wi-Fi credentials included?')) {
         return;
     }
-    fetch('cgi-bin/reset.sh').catch(function () { });
+    fetch('cgi-bin/reset.sh')['catch'](function () { });
     waitForCamera();
 }
 
@@ -471,7 +471,7 @@ function loadTz() {
             html += '<option value="' + escapeHTML(loc) + '"></option>';
         });
         $('#tz-list').innerHTML = html;
-    }).catch(function () { /* the TZ string field still works by hand */ });
+    })['catch'](function () { /* the TZ string field still works by hand */ });
 }
 
 /* ------------------------------------------------------------------ run */
@@ -501,7 +501,7 @@ function init() {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(src.textContent).then(function () {
                 toast('Copied');
-            }).catch(function () {
+            })['catch'](function () {
                 toast('Copy blocked - select it by hand', true);
             });
         } else {

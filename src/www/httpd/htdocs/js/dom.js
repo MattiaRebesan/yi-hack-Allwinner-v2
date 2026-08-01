@@ -5,6 +5,11 @@
  * while using about fifteen of its methods. Everything below is ES5 on
  * purpose: compile.www minifies with yui-compressor, which is Rhino-based
  * and rejects arrow functions, template literals and spread.
+ *
+ * Rhino is in fact ES3, which means a reserved word cannot follow a dot:
+ * `p.catch(fn)` fails to parse with "missing name after . operator". Promise
+ * rejection is therefore handled as `p['catch'](fn)` throughout. That is the
+ * only reason for the bracket notation - do not tidy it away.
  */
 
 function $(sel, root) {
