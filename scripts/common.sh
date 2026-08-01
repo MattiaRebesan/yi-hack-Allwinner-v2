@@ -23,26 +23,7 @@
 
 declare -A CAMERAS
 
-CAMERAS["y21ga"]="y21ga"
-CAMERAS["y211ga"]="y211ga"
-CAMERAS["y211ba"]="y211ba"
-CAMERAS["y213ga"]="y213ga"
-CAMERAS["h30ga"]="h30ga"
-CAMERAS["r30gb"]="r30gb"
-CAMERAS["r35gb"]="r35gb"
-CAMERAS["r37gb"]="r37gb"
-CAMERAS["h52ga"]="h52ga"
-CAMERAS["h51ga"]="h51ga"
-CAMERAS["y28ga"]="y28ga"
-CAMERAS["y29ga"]="y29ga"
-CAMERAS["y291ga"]="y291ga"
 CAMERAS["y623"]="y623"
-CAMERAS["r40ga"]="r40ga"
-CAMERAS["h60ga"]="h60ga"
-CAMERAS["q321br_lsx"]="q321br_lsx"
-CAMERAS["qg311r"]="qg311r"
-CAMERAS["q705br"]="q705br"
-CAMERAS["b091qp"]="b091qp"
 
 ###############################################################################
 # Common functions
