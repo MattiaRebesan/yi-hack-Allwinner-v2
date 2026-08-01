@@ -338,19 +338,28 @@ without blocking a second per pass on `top`, and it fixed two genuine defects
 (see below). It is a tidiness and CPU-per-pass change. **It is not a load fix,
 and the load figure is unchanged** -- do not cite it as one.
 
-Two real defects surfaced while measuring, both fixed:
-`mqttv4` was running with `MQTT=no` in `system.conf`, because upstream's
-`check_mqtt` never consults the config before restarting it; and `camera.conf`
-shipped `SAVE_VIDEO_ON_MOTION=yes` with `MOTION_DETECTION=no` on a build that
-is supposed to record nothing.
+One real defect surfaced while measuring and was fixed: `mqttv4` was running
+with `MQTT=no` in `system.conf`, because upstream's `check_mqtt` never
+consults the config before restarting it.
 
-**Still open on the live card:** `flash-sd.sh` carries the old card's values
-across a flash (`camera.conf` verbatim via `PRESERVE`, `system.conf` key by
-key via the merge, "your value always wins"). So the repo fix to
-`SAVE_VIDEO_ON_MOTION` did **not** reach the camera -- it still reads `yes` --
-and `DEBUG_LOG` still reads `yes` against a build default of `no`. That is the
-merge working as designed, but it means a hardened default in the repo is not
-the same thing as a hardened value on the hardware. Check
+**A second "defect" was not one, and the attempted fix was a bug.**
+`camera.conf` ships `SAVE_VIDEO_ON_MOTION=yes` alongside
+`MOTION_DETECTION=no`, which reads like a contradiction on a build that
+records nothing. It is not. `camera_settings.sh:57-62` maps the key to
+`ipc_cmd -v detect` when `yes` and **`ipc_cmd -v always` when `no`** -- the
+setting selects *which* save mode, not *whether* to save. `no` means record
+continuously. The UI already says so in the hint under the toggle. `yes` with
+motion detection off is the correct combination for a camera that records
+nothing, and briefly setting it to `no` in the repo would have armed
+continuous recording on any fresh card. Reverted. Do not "fix" this again.
+
+**Values on the card are not values in the repo.** `flash-sd.sh` carries the
+old card's settings across a flash (`camera.conf` verbatim via `PRESERVE`,
+`system.conf` key by key via the merge, "your value always wins"). That is
+the merge working as designed -- and here it is what kept the bad
+`SAVE_VIDEO_ON_MOTION` off the hardware -- but it cuts both ways: `DEBUG_LOG`
+still reads `yes` on the live card against a build default of `no`. A
+hardened default in the repo is not a hardened value on the hardware. Check
 `get_configs.sh?conf=system` after any flash.
 
 ### The "1 fps in Home Assistant" was not the camera
