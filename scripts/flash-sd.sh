@@ -56,22 +56,19 @@ verify() {
     local ip="$1" ok=0
     say "Checking camera at $ip"
 
-    if ! ping -c 2 -t 3 "$ip" >/dev/null 2>&1; then
-        die "$ip does not answer ping. Give it ~60s after power-on, then retry."
-    fi
-
+    # Not a ping check: the camera drops ICMP but serves HTTP fine.
     local status
-    status=$(curl -s --max-time 10 "http://$ip/cgi-bin/status.json" || true)
+    status=$(curl -s --max-time 15 "http://$ip/cgi-bin/status.json" || true)
     if [ -z "$status" ]; then
-        echo "  status.json  FAIL (no response)"; ok=1
-    else
-        echo "  status.json  OK"
-        echo "$status" | grep -E '"(fw_version|model_suffix|free_memory|total_memory)"' | sed 's/^/    /'
+        die "$ip is not serving http. Give it ~60s after power-on, then retry."
     fi
+    echo "  status.json  OK"
+    echo "$status" | grep -E '"(fw_version|model_suffix|uptime|free_memory|total_memory)"' | sed 's/^/    /'
 
+    # The \n matters: without it read hits EOF, returns 1, and set -e aborts.
     local code size
     read -r code size < <(curl -s -o /dev/null --max-time 20 \
-        -w '%{http_code} %{size_download}' "http://$ip/cgi-bin/snapshot.sh" || echo "000 0")
+        -w '%{http_code} %{size_download}\n' "http://$ip/cgi-bin/snapshot.sh" || echo "000 0")
     if [ "$code" = "200" ] && [ "$size" -gt 10000 ]; then
         echo "  snapshot     OK ($size bytes)"
     else
@@ -266,9 +263,14 @@ fi
 
 # ---------------------------------------------------------------------- eject
 
+# macOS keeps .Spotlight-V100 / .fseventsd SIP-protected, so both dot_clean and
+# find fail on them. Those dirs never hold ._* files and the camera ignores
+# them, so prune them and drop the noise.
 say "Cleaning AppleDouble files"
-dot_clean -m "$VOLUME" || true
-leftover=$(find "$VOLUME" -name '._*' | wc -l | tr -d ' ')
+dot_clean -m "$VOLUME" 2>/dev/null || true
+leftover=$(find "$VOLUME" \
+    \( -name '.Spotlight-V100' -o -name '.fseventsd' -o -name '.Trashes' \) -prune -o \
+    -name '._*' -print 2>/dev/null | wc -l | tr -d ' ')
 [ "$leftover" = "0" ] || echo "    warning: $leftover ._* files remain"
 
 sync
