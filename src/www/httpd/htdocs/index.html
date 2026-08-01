@@ -1,72 +1,384 @@
-<!doctype html>
-<html class="no-js" lang="en" data-theme="dark">
-	<head>
-		<meta charset="utf-8" />
-        <title>Yi Cam Config</title>
-        <meta name="author" content="gaggi, TheCrypt0, ramundomario, roleoroleo" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />  
-        <link rel="apple-touch-icon" href="img/icon.png" />
-        <link rel="stylesheet" href="css/all.css" />
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>yi-hack</title>
+<link rel="icon" type="image/png" href="img/icon.png"/>
+<link rel="apple-touch-icon" href="img/icon.png"/>
+<link rel="stylesheet" href="css/all.css"/>
+</head>
+<body>
 
-	<body>
-		<nav class="nav-show">
-			<div class="container">
-				<ul>
-                    <li>
-                        <a id="nav-title" href="index.html">
-                            <svg width="88" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m 57.181128,2.0656951 c -0.91041,0.2280188 -1.711964,0.8426784 -2.097898,1.5862181 -0.405725,0.773282 -0.445309,1.3482854 -0.445309,6.2457352 0,3.8763226 0.02969,4.8181396 0.158332,5.3534896 0.267184,1.150006 0.761972,1.774581 1.771337,2.250446 0.534371,0.247847 0.692703,0.277588 1.682276,0.277588 0.989575,0 1.147907,-0.02973 1.682278,-0.277588 1.454673,-0.684057 1.929669,-1.715098 1.929669,-4.262962 v -1.3582 h -2.276021 v 1.209492 c 0,1.943117 -0.247394,2.458638 -1.187488,2.458638 -0.60364,0 -1.009367,-0.188364 -1.167698,-0.545262 -0.08907,-0.188363 -0.11876,-1.566391 -0.11876,-5.1353828 0,-4.659517 0.0099,-4.8875357 0.197916,-5.1948661 0.346351,-0.5750035 1.454674,-0.6642281 1.899982,-0.1586212 0.257289,0.2875022 0.376038,0.912075 0.376038,1.9332038 v 0.9715585 h 2.276022 V 6.2989155 c 0,-2.2603613 -0.524476,-3.3608007 -1.919774,-3.9952876 -0.474997,-0.2181056 -0.761973,-0.2775882 -1.484362,-0.2974163 -0.494787,-0.019832 -1.06874,0.00992 -1.27655,0.059487 z M 16.786712,2.3730244 c 0.0396,0.1090534 0.732284,2.4388107 1.543735,5.1750378 l 1.474466,4.9668468 v 5.115555 h 2.473935 v -5.284091 l 1.484361,-4.9965873 c 0.821347,-2.7461411 1.484362,-5.0362437 1.484362,-5.0858131 0,-0.059487 -0.474996,-0.099139 -1.138011,-0.099139 H 22.981447 L 22.89238,2.4820772 C 22.842903,2.6605267 22.427283,4.2467448 21.97208,6.0114134 21.437711,8.0734972 21.121047,9.1441946 21.081463,9.0252286 21.0023,8.8170369 19.310125,2.313542 19.310125,2.2243163 c 0,-0.029739 -0.583849,-0.059487 -1.296342,-0.059487 -1.25676,0 -1.286446,0.00992 -1.227071,0.2081907 z m 9.549388,7.524624 v 7.7328156 h 2.473936 V 2.1648339 H 26.3361 Z m 10.093657,0 v 7.7328156 h 2.473936 v -6.64229 h 2.67185 v 6.64229 h 2.473934 V 2.1648339 h -2.473934 v 6.6422899 h -2.67185 V 2.1648339 H 36.429757 Z M 47.67132,2.4325079 C 47.64163,2.5911302 47.097368,5.9420158 46.473934,9.8976484 45.840608,13.853282 45.306237,17.204168 45.276549,17.36279 l -0.05937,0.267674 h 2.266125 l 0.168227,-1.219405 c 0.09896,-0.664229 0.197914,-1.288803 0.227602,-1.38794 0.03957,-0.148709 0.197915,-0.168537 1.523943,-0.168537 0.811452,0 1.474467,0.02973 1.474467,0.06939 0,0.04957 0.08907,0.634487 0.197916,1.318544 0.108853,0.684056 0.197913,1.268975 0.197913,1.30863 0,0.04957 0.564057,0.07931 1.246864,0.07931 H 53.7671 L 53.70772,17.362782 C 53.678036,17.204162 53.143664,13.853275 52.510337,9.8976415 51.886905,5.9420089 51.34264,2.5911232 51.312952,2.432501 l -0.05939,-0.267674 h -3.522884 z m 2.27602,6.2754771 c 0.296873,2.022429 0.53437,3.767269 0.53437,3.876321 0,0.17845 -0.07916,0.188363 -1.147906,0.188363 h -1.147906 l 0.04948,-0.277588 c 0.02969,-0.148708 0.286976,-1.903461 0.573954,-3.9060629 0.296872,-1.9926863 0.544264,-3.6185607 0.564056,-3.5987326 0.01979,0.00992 0.277081,1.685357 0.573952,3.7176995 z m 13.398834,1.1896634 v 7.7328156 h 2.473935 v -2.409069 l -0.0099,-2.399156 0.32656,-0.61466 c 0.178123,-0.346985 0.346351,-0.624573 0.376039,-0.624573 0.02968,0 0.564056,1.348286 1.197384,3.003902 l 1.147905,2.993987 1.246864,0.02973 c 0.692702,0.0099 1.256759,0.0099 1.256759,0 0,-0.01983 -0.752077,-1.953032 -1.682276,-4.292705 l -1.6724,-4.2629624 1.434883,-2.9245905 c 0.801554,-1.6060454 1.553632,-3.1625223 1.682276,-3.4500246 l 0.237488,-0.5155156 h -2.424456 l -1.533842,3.2814892 -1.53384,3.2914033 -0.02968,-3.2914033 -0.01979,-3.2814892 h -2.473935 z m -32.952818,0 v 1.0905256 h 4.453083 V 8.8071238 H 30.393356 Z M 2.1113267,21.120146 c -0.1484356,0.148708 -0.1484356,0.604745 0,0.753453 0.168228,0.168535 83.6091183,0.168535 83.7773463,0 0.148436,-0.148708 0.148436,-0.604745 0,-0.753453 -0.168228,-0.168536 -83.6091182,-0.168536 -83.7773463,0 z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=configurations" title="Configurations">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6a1 1 0 000 2h6a1 1 0 100-2H9zM9 10a1 1 0 100 2h6a1 1 0 100-2H9zM13 17a1 1 0 11-2 0 1 1 0 012 0z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M4 5a3 3 0 013-3h10a3 3 0 013 3v14a3 3 0 01-3 3H7a3 3 0 01-3-3V5zm3-1h10a1 1 0 011 1v14a1 1 0 01-1 1H7a1 1 0 01-1-1V5a1 1 0 011-1z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=mqtt" title="MQTT">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.924 18v-4a3 3 0 00-6 0v4a3 3 0 106 0zm-3-9a5 5 0 00-5 5v4a5 5 0 0010 0v-4a5 5 0 00-5-5z" fill="currentColor"/><path d="M10.924 14a1 1 0 112 0v3h-2v-3zM11.924 1a9.97 9.97 0 017.105 2.963l-1.415 1.414A7.976 7.976 0 0011.924 3c-2.15 0-4.1.847-5.538 2.227L4.97 3.812A9.967 9.967 0 0111.924 1z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M11.923 5a6.97 6.97 0 014.38 1.539l-1.426 1.426A4.978 4.978 0 0011.923 7c-1.075 0-2.071.34-2.886.917l-1.43-1.429A6.97 6.97 0 0111.924 5z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=camera_settings" title="Camera Settings">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 4.5v2h8v1H3a3 3 0 00-3 3v6a3 3 0 003 3h12a3 3 0 002.99-2.751L24 17.5v-8l-6.01.751A3 3 0 0015 7.5h-1v-2a1 1 0 00-1-1H4zm14 7.766v2.468l4 .5v-3.468l-4 .5zM16 10.5a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h12a1 1 0 001-1v-6z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=snapshot" title="Snapshot">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M7 7a3 3 0 100 6 3 3 0 000-6zm-1 3a1 1 0 112 0 1 1 0 01-2 0z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M3 3a3 3 0 00-3 3v12a3 3 0 003 3h18a3 3 0 003-3V6a3 3 0 00-3-3H3zm18 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4.314l6.878-6.879a3 3 0 014.243 0L22 15.686V6a1 1 0 00-1-1zm0 14H10.142l5.465-5.464a1 1 0 011.414 0l4.886 4.886A1 1 0 0121 19z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=ptz" title="PTZ">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.828 6.343l1.415-1.414L12 .686 7.757 4.93l1.415 1.414L12 3.515l2.828 2.828zM4.929 16.243l1.414-1.415L3.515 12l2.828-2.828L4.93 7.757.686 12l4.243 4.243zM7.757 19.071L12 23.314l4.243-4.243-1.415-1.414L12 20.485l-2.828-2.828-1.415 1.414zM17.657 9.172L20.485 12l-2.828 2.828 1.414 1.415L23.314 12 19.07 7.757l-1.414 1.415z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 8a4 4 0 110 8 4 4 0 010-8zm0 2a2 2 0 110 4 2 2 0 010-4z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=maintenance" title="Maintenance">
-                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.26 21.997a10.276 10.276 0 01-.52 0 10.004 10.004 0 01-8.983-6.173 10.034 10.034 0 01.017-7.69A10.015 10.015 0 014.908 4.95l.042-.042a10.015 10.015 0 013.167-2.126 10.034 10.034 0 017.753-.006 10.015 10.015 0 013.186 2.138l.03.03c.913.917 1.65 2.01 2.153 3.223a10.012 10.012 0 01.76 3.985 10.004 10.004 0 01-6.226 9.112 10.013 10.013 0 01-3.512.733zm1.772-6.55l2.874 2.873a8.004 8.004 0 01-9.812 0l2.874-2.874a4.007 4.007 0 004.064 0zm-5.478-1.415L5.68 16.906a8.004 8.004 0 010-9.812l2.874 2.874a4.007 4.007 0 000 4.064zm1.528-1.463a2.01 2.01 0 01-.014-1.087 1.99 1.99 0 01.518-.896 1.99 1.99 0 011.932-.518c.328.088.639.26.896.518a1.99 1.99 0 01.518 1.932c-.088.328-.26.639-.518.896a1.99 1.99 0 01-1.932.518 1.991 1.991 0 01-.896-.518 1.99 1.99 0 01-.504-.845zm3.95-4.015a4.007 4.007 0 00-4.064 0L7.094 5.68a8.004 8.004 0 019.812 0l-2.874 2.874zm4.288 8.352a8.004 8.004 0 000-9.812l-2.874 2.874a4.007 4.007 0 010 4.064l2.874 2.874z" fill="currentColor"/></svg>
-                        </a>
-                    </li>
-                    <li class="nav-elem-right">
-                        <div id="theme-switcher">
-                            <a href="#" title="Switch Mode">
-                                <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 16a4 4 0 000-8v8z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 2v4a4 4 0 100 8v4a8 8 0 100-16z" fill="currentColor"/></svg>
-                            </a>
-                        </div>
-                    </li>
-                    <li class="icon">
-                        <a class="nav-toggler ios-onclick-fix">&#9776;</a>
-                    </li>
-				</ul>
-			</div>
-        </nav>
+<header>
+    <h1 id="dev-name">yi-hack</h1>
+    <nav id="nav">
+        <a href="#status">Status</a>
+        <a href="#stream">Stream</a>
+        <a href="#camera">Camera</a>
+        <a href="#ha">Home Assistant</a>
+        <a href="#system">System</a>
+    </nav>
+    <button id="theme" title="Switch light / dark">&#9680;</button>
+</header>
 
-        <div id="container" class="container">
-        </div>
+<div id="banner" hidden>
+    <span id="banner-text"></span>
+    <button id="banner-reboot" class="primary">Reboot now</button>
+    <button id="banner-close">Dismiss</button>
+</div>
 
-        <script src="js/jquery.min.js"></script>
-        <script src="cgi-bin/hostname.js"></script>
-        <script src="js/all.js"></script>
-	</body>
+<main>
+
+<!-- ------------------------------------------------------------ Status -->
+<section id="view-status" hidden>
+    <h2>Streams</h2>
+    <div class="card">
+        <div class="f"><label>Main stream</label><code id="u-high">-</code><button class="copy" data-copy="u-high">Copy</button></div>
+        <div class="f"><label>Sub stream</label><code id="u-low">-</code><button class="copy" data-copy="u-low">Copy</button></div>
+        <div class="f"><label>Audio only</label><code id="u-audio">-</code><button class="copy" data-copy="u-audio">Copy</button></div>
+        <div class="f"><label>ONVIF device service</label><code id="u-onvif">-</code><button class="copy" data-copy="u-onvif">Copy</button></div>
+        <div class="f"><label>Snapshot</label><span><a id="u-snap-high" href="#" target="_blank" rel="noopener">high</a> &middot; <a id="u-snap-low" href="#" target="_blank" rel="noopener">low</a></span></div>
+    </div>
+
+    <h2>Home Assistant</h2>
+    <div class="card">
+        <p class="hint">Paste into go2rtc (Settings &rarr; Add-ons &rarr; go2rtc, or <code>configuration.yaml</code>). WebRTC through go2rtc is the sub-second path; the generic camera integration over HLS is not.</p>
+        <pre id="go2rtc">-</pre>
+        <div class="actions"><button class="copy" data-copy="go2rtc">Copy</button></div>
+    </div>
+
+    <h2>Snapshot</h2>
+    <div class="card">
+        <div class="actions"><button id="btn-snap">Take snapshot</button><span class="hint">On demand only &mdash; grabbing a frame costs CPU the camera would rather spend on the stream.</span></div>
+        <img id="snap" alt="Camera snapshot" hidden/>
+    </div>
+
+    <h2>Device</h2>
+    <div class="card">
+        <div class="f"><label>Hostname</label><span id="s-hostname">-</span></div>
+        <div class="f"><label>Firmware</label><span id="s-fw">-</span></div>
+        <div class="f"><label>Base version</label><span id="s-home">-</span></div>
+        <div class="f"><label>Model</label><span id="s-model">-</span></div>
+        <div class="f"><label>Serial number</label><span id="s-serial">-</span></div>
+        <div class="f"><label>Local time</label><span id="s-time">-</span></div>
+        <div class="f"><label>Uptime</label><span id="s-uptime">-</span></div>
+        <div class="f"><label>Load average</label><span id="s-load">-</span></div>
+        <div class="f"><label>Free memory</label><span id="s-mem">-</span></div>
+        <div class="f"><label>Free SD space</label><span id="s-sd">-</span></div>
+        <div class="f"><label>IP address</label><span id="s-ip">-</span></div>
+        <div class="f"><label>Netmask</label><span id="s-mask">-</span></div>
+        <div class="f"><label>Gateway</label><span id="s-gw">-</span></div>
+        <div class="f"><label>MAC address</label><span id="s-mac">-</span></div>
+        <div class="f"><label>Wi-Fi</label><span id="s-wifi">-</span></div>
+    </div>
+</section>
+
+<!-- ------------------------------------------------------------ Stream -->
+<section id="view-stream" hidden>
+    <h2>RTSP</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-RTSP">RTSP server</label><input type="checkbox" class="sw" id="k-RTSP" data-key="RTSP"/></div>
+        <div class="f"><label for="k-RTSP_STREAM">Streams published</label>
+            <select id="k-RTSP_STREAM" data-key="RTSP_STREAM">
+                <option value="high">High resolution only</option>
+                <option value="low">Low resolution only</option>
+                <option value="both">Both</option>
+            </select></div>
+        <div class="f"><label for="k-RTSP_AUDIO">Audio codec</label>
+            <select id="k-RTSP_AUDIO" data-key="RTSP_AUDIO">
+                <option value="no">None</option>
+                <option value="aac">AAC (passthrough)</option>
+                <option value="pcm">PCM</option>
+                <option value="alaw">G.711 a-law</option>
+                <option value="ulaw">G.711 u-law</option>
+            </select></div>
+        <div class="f"><label for="k-RTSP_PORT">RTSP port</label><input type="text" inputmode="numeric" id="k-RTSP_PORT" data-key="RTSP_PORT"/></div>
+        <p class="hint">Only AAC is passthrough. Every other codec makes the camera decode its own audio and re-encode it frame by frame, on the same CPU that is serving video.</p>
+    </div>
+
+    <h2>Snapshots and overlay</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-SNAPSHOT">High resolution snapshot</label><input type="checkbox" class="sw" id="k-SNAPSHOT" data-key="SNAPSHOT"/></div>
+        <div class="f"><label for="k-SNAPSHOT_LOW">Low resolution snapshot</label><input type="checkbox" class="sw" id="k-SNAPSHOT_LOW" data-key="SNAPSHOT_LOW"/></div>
+        <div class="f"><label for="k-TIME_OSD">Timestamp overlay</label><input type="checkbox" class="sw" id="k-TIME_OSD" data-key="TIME_OSD"/></div>
+        <div class="f"><label for="k-CUSTOM_WATERMARK">Custom watermark</label><input type="checkbox" class="sw" id="k-CUSTOM_WATERMARK" data-key="CUSTOM_WATERMARK"/></div>
+    </div>
+
+    <h2>ONVIF</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-ONVIF">ONVIF server</label><input type="checkbox" class="sw" id="k-ONVIF" data-key="ONVIF"/></div>
+        <div class="f"><label for="k-ONVIF_PROFILE">Profiles published</label>
+            <select id="k-ONVIF_PROFILE" data-key="ONVIF_PROFILE">
+                <option value="high">High resolution only</option>
+                <option value="low">Low resolution only</option>
+                <option value="both">Both</option>
+            </select></div>
+        <div class="f"><label for="k-ONVIF_NETIF">Network interface</label>
+            <select id="k-ONVIF_NETIF" data-key="ONVIF_NETIF">
+                <option value="wlan0">wlan0 (Wi-Fi)</option>
+                <option value="eth0">eth0</option>
+            </select></div>
+        <div class="f"><label for="k-ONVIF_WSDD">WS-Discovery</label><input type="checkbox" class="sw" id="k-ONVIF_WSDD" data-key="ONVIF_WSDD"/></div>
+        <details>
+            <summary>Compatibility</summary>
+            <div class="f"><label for="k-ONVIF_WM_SNAPSHOT">Watermark on ONVIF snapshot</label><input type="checkbox" class="sw" id="k-ONVIF_WM_SNAPSHOT" data-key="ONVIF_WM_SNAPSHOT"/></div>
+            <div class="f"><label for="k-ONVIF_AUDIO_BC">Audio backchannel</label>
+                <select id="k-ONVIF_AUDIO_BC" data-key="ONVIF_AUDIO_BC">
+                    <option value="NONE">None</option>
+                    <option value="G711">G.711</option>
+                    <option value="AAC">AAC</option>
+                </select></div>
+            <div class="f"><label for="k-ONVIF_ENABLE_MEDIA2">Media2 service</label><input type="checkbox" class="sw" id="k-ONVIF_ENABLE_MEDIA2" data-key="ONVIF_ENABLE_MEDIA2"/></div>
+            <div class="f"><label for="k-ONVIF_FAULT_IF_UNKNOWN">Fault on unknown request</label><input type="checkbox" class="sw" id="k-ONVIF_FAULT_IF_UNKNOWN" data-key="ONVIF_FAULT_IF_UNKNOWN"/></div>
+            <div class="f"><label for="k-ONVIF_SYNOLOGY_NVR">Synology NVR workaround</label><input type="checkbox" class="sw" id="k-ONVIF_SYNOLOGY_NVR" data-key="ONVIF_SYNOLOGY_NVR"/></div>
+        </details>
+    </div>
+
+    <div class="actions"><button class="primary" data-save="1">Save</button></div>
+</section>
+
+<!-- ------------------------------------------------------------ Camera -->
+<section id="view-camera" hidden>
+    <h2>Image</h2>
+    <div class="card" data-conf="camera">
+        <div class="f"><label for="k-SWITCH_ON">Camera on</label><input type="checkbox" class="sw" id="k-SWITCH_ON" data-key="SWITCH_ON"/></div>
+        <div class="f"><label for="k-LED">Status LED</label><input type="checkbox" class="sw" id="k-LED" data-key="LED"/></div>
+        <div class="f"><label for="k-IR">Infrared night vision</label><input type="checkbox" class="sw" id="k-IR" data-key="IR"/></div>
+        <div class="f"><label for="k-ROTATE">Rotate 180&deg;</label><input type="checkbox" class="sw" id="k-ROTATE" data-key="ROTATE"/></div>
+    </div>
+
+    <h2>Detection</h2>
+    <div class="card" data-conf="camera">
+        <div class="f fw12"><label for="k-MOTION_DETECTION">Motion detection</label><input type="checkbox" class="sw" id="k-MOTION_DETECTION" data-key="MOTION_DETECTION"/></div>
+        <div class="f"><label for="k-AI_HUMAN_DETECTION">Human detection</label><input type="checkbox" class="sw" id="k-AI_HUMAN_DETECTION" data-key="AI_HUMAN_DETECTION"/></div>
+        <div class="f fw12"><label for="k-AI_VEHICLE_DETECTION">Vehicle detection</label><input type="checkbox" class="sw" id="k-AI_VEHICLE_DETECTION" data-key="AI_VEHICLE_DETECTION"/></div>
+        <div class="f fw12"><label for="k-AI_ANIMAL_DETECTION">Animal detection</label><input type="checkbox" class="sw" id="k-AI_ANIMAL_DETECTION" data-key="AI_ANIMAL_DETECTION"/></div>
+        <div class="f no-fw12"><label for="k-FACE_DETECTION">Face detection</label><input type="checkbox" class="sw" id="k-FACE_DETECTION" data-key="FACE_DETECTION"/></div>
+        <div class="f no-fw12"><label for="k-MOTION_TRACKING">Motion tracking</label><input type="checkbox" class="sw" id="k-MOTION_TRACKING" data-key="MOTION_TRACKING"/></div>
+        <div class="f"><label for="k-SENSITIVITY">Motion sensitivity</label>
+            <select id="k-SENSITIVITY" data-key="SENSITIVITY">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select></div>
+        <div class="f"><label for="k-SOUND_DETECTION">Sound detection</label><input type="checkbox" class="sw" id="k-SOUND_DETECTION" data-key="SOUND_DETECTION"/></div>
+        <div class="f"><label for="k-SOUND_SENSITIVITY">Sound sensitivity (dB)</label>
+            <select id="k-SOUND_SENSITIVITY" data-key="SOUND_SENSITIVITY">
+                <option value="30">30</option><option value="35">35</option>
+                <option value="40">40</option><option value="45">45</option>
+                <option value="50">50</option><option value="60">60</option>
+                <option value="70">70</option><option value="80">80</option>
+                <option value="90">90</option>
+            </select></div>
+        <div class="f"><label for="k-SAVE_VIDEO_ON_MOTION">Record only on motion</label><input type="checkbox" class="sw" id="k-SAVE_VIDEO_ON_MOTION" data-key="SAVE_VIDEO_ON_MOTION"/></div>
+        <p class="hint">Turning "record only on motion" off means <b>record continuously</b>, not "do not record" &mdash; the firmware maps it to save mode ALWAYS. Motion detection and the AI detections are mutually exclusive; enabling one clears the others.</p>
+    </div>
+
+    <div class="actions"><button class="primary" data-save="1">Apply</button><span class="hint">Applied immediately. No reboot.</span></div>
+
+    <h2>Speaker</h2>
+    <div class="card">
+        <div class="f"><label for="tts-text">Text to speak</label><input type="text" id="tts-text"/></div>
+        <div class="f"><label for="tts-lang">Language</label>
+            <select id="tts-lang">
+                <option value="en-US">en-US</option><option value="en-GB">en-GB</option>
+                <option value="de-DE">de-DE</option><option value="es-ES">es-ES</option>
+                <option value="fr-FR">fr-FR</option><option value="it-IT">it-IT</option>
+            </select></div>
+        <div class="f"><label for="tts-vol">Volume</label><select id="tts-vol" class="vol"></select></div>
+        <div class="actions"><button id="btn-tts">Speak</button></div>
+        <div class="f"><label for="wav-file">WAV file (S16LE, 16 kHz, mono)</label><input type="file" id="wav-file" accept=".wav"/></div>
+        <div class="f"><label for="wav-vol">Volume</label><select id="wav-vol" class="vol"></select></div>
+        <div class="actions"><button id="btn-wav">Play file</button></div>
+    </div>
+</section>
+
+<!-- ---------------------------------------------------- Home Assistant -->
+<section id="view-ha" hidden>
+    <h2>MQTT broker</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-MQTT">MQTT client</label><input type="checkbox" class="sw" id="k-MQTT" data-key="MQTT"/></div>
+    </div>
+    <div class="card" data-conf="mqtt">
+        <div class="f"><label for="k-MQTT_IP">Broker address</label><input type="text" id="k-MQTT_IP" data-key="MQTT_IP"/></div>
+        <div class="f"><label for="k-MQTT_PORT">Broker port</label><input type="text" inputmode="numeric" id="k-MQTT_PORT" data-key="MQTT_PORT"/></div>
+        <div class="f"><label for="k-MQTT_TLS">TLS</label><input type="text" id="k-MQTT_TLS" data-key="MQTT_TLS"/></div>
+        <div class="f"><label for="k-MQTT_USER">Username</label><input type="text" id="k-MQTT_USER" data-key="MQTT_USER" autocomplete="off"/></div>
+        <div class="f"><label for="k-MQTT_PASSWORD">Password</label><input type="password" id="k-MQTT_PASSWORD" data-key="MQTT_PASSWORD" autocomplete="new-password"/></div>
+        <div class="f"><label for="k-MQTT_CLIENT_ID">Client ID</label><input type="text" id="k-MQTT_CLIENT_ID" data-key="MQTT_CLIENT_ID"/></div>
+        <div class="f"><label for="k-MQTT_PREFIX">Topic prefix</label><input type="text" id="k-MQTT_PREFIX" data-key="MQTT_PREFIX"/></div>
+
+        <details>
+            <summary>Topics and messages</summary>
+            <div class="f"><label for="k-TOPIC_BIRTH_WILL">Birth / will topic</label><input type="text" id="k-TOPIC_BIRTH_WILL" data-key="TOPIC_BIRTH_WILL"/></div>
+            <div class="f"><label for="k-BIRTH_MSG">Birth message</label><input type="text" id="k-BIRTH_MSG" data-key="BIRTH_MSG"/></div>
+            <div class="f"><label for="k-WILL_MSG">Will message</label><input type="text" id="k-WILL_MSG" data-key="WILL_MSG"/></div>
+            <div class="f"><label for="k-TOPIC_MOTION">Motion topic</label><input type="text" id="k-TOPIC_MOTION" data-key="TOPIC_MOTION"/></div>
+            <div class="f"><label for="k-MOTION_START_MSG">Motion start message</label><input type="text" id="k-MOTION_START_MSG" data-key="MOTION_START_MSG"/></div>
+            <div class="f"><label for="k-MOTION_STOP_MSG">Motion stop message</label><input type="text" id="k-MOTION_STOP_MSG" data-key="MOTION_STOP_MSG"/></div>
+            <div class="f"><label for="k-AI_HUMAN_DETECTION_MSG">Human detected message</label><input type="text" id="k-AI_HUMAN_DETECTION_MSG" data-key="AI_HUMAN_DETECTION_MSG"/></div>
+            <div class="f"><label for="k-AI_VEHICLE_DETECTION_MSG">Vehicle detected message</label><input type="text" id="k-AI_VEHICLE_DETECTION_MSG" data-key="AI_VEHICLE_DETECTION_MSG"/></div>
+            <div class="f"><label for="k-AI_ANIMAL_DETECTION_MSG">Animal detected message</label><input type="text" id="k-AI_ANIMAL_DETECTION_MSG" data-key="AI_ANIMAL_DETECTION_MSG"/></div>
+            <div class="f"><label for="k-TOPIC_MOTION_IMAGE">Motion image topic</label><input type="text" id="k-TOPIC_MOTION_IMAGE" data-key="TOPIC_MOTION_IMAGE"/></div>
+            <div class="f"><label for="k-MOTION_IMAGE_DELAY">Motion image delay (s, max 5.0)</label><input type="text" inputmode="decimal" id="k-MOTION_IMAGE_DELAY" data-key="MOTION_IMAGE_DELAY"/></div>
+            <div class="f"><label for="k-TOPIC_MOTION_FILES">Motion files topic</label><input type="text" id="k-TOPIC_MOTION_FILES" data-key="TOPIC_MOTION_FILES"/></div>
+            <div class="f"><label for="k-TOPIC_SOUND_DETECTION">Sound detection topic</label><input type="text" id="k-TOPIC_SOUND_DETECTION" data-key="TOPIC_SOUND_DETECTION"/></div>
+            <div class="f"><label for="k-SOUND_DETECTION_MSG">Sound detected message</label><input type="text" id="k-SOUND_DETECTION_MSG" data-key="SOUND_DETECTION_MSG"/></div>
+            <div class="f"><label for="k-MQTT_PREFIX_CONFIG">Config topic prefix</label><input type="text" id="k-MQTT_PREFIX_CONFIG" data-key="MQTT_PREFIX_CONFIG"/></div>
+        </details>
+
+        <details>
+            <summary>Delivery</summary>
+            <div class="f"><label for="k-MQTT_KEEPALIVE">Keepalive (s)</label><input type="text" inputmode="numeric" id="k-MQTT_KEEPALIVE" data-key="MQTT_KEEPALIVE"/></div>
+            <div class="f"><label for="k-MQTT_QOS">QoS</label><input type="text" inputmode="numeric" id="k-MQTT_QOS" data-key="MQTT_QOS"/></div>
+            <div class="f"><label for="k-MQTT_RETAIN_BIRTH_WILL">Retain birth / will</label><input type="text" id="k-MQTT_RETAIN_BIRTH_WILL" data-key="MQTT_RETAIN_BIRTH_WILL"/></div>
+            <div class="f"><label for="k-MQTT_RETAIN_MOTION">Retain motion</label><input type="text" id="k-MQTT_RETAIN_MOTION" data-key="MQTT_RETAIN_MOTION"/></div>
+            <div class="f"><label for="k-MQTT_RETAIN_MOTION_IMAGE">Retain motion image</label><input type="text" id="k-MQTT_RETAIN_MOTION_IMAGE" data-key="MQTT_RETAIN_MOTION_IMAGE"/></div>
+            <div class="f"><label for="k-MQTT_RETAIN_MOTION_FILES">Retain motion files</label><input type="text" id="k-MQTT_RETAIN_MOTION_FILES" data-key="MQTT_RETAIN_MOTION_FILES"/></div>
+            <div class="f"><label for="k-MQTT_RETAIN_SOUND_DETECTION">Retain sound detection</label><input type="text" id="k-MQTT_RETAIN_SOUND_DETECTION" data-key="MQTT_RETAIN_SOUND_DETECTION"/></div>
+        </details>
+    </div>
+
+    <h2>Discovery</h2>
+    <div class="card" data-conf="mqtt_advertise">
+        <div class="f"><label for="k-HOMEASSISTANT_ENABLE">Home Assistant discovery</label><input type="checkbox" class="sw" id="k-HOMEASSISTANT_ENABLE" data-key="HOMEASSISTANT_ENABLE"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_BOOT">Publish at boot</label><input type="checkbox" class="sw" id="k-HOMEASSISTANT_BOOT" data-key="HOMEASSISTANT_BOOT"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_MQTT_PREFIX">Discovery prefix</label><input type="text" id="k-HOMEASSISTANT_MQTT_PREFIX" data-key="HOMEASSISTANT_MQTT_PREFIX"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_NAME">Device name</label><input type="text" id="k-HOMEASSISTANT_NAME" data-key="HOMEASSISTANT_NAME"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_IDENTIFIERS">Identifiers</label><input type="text" id="k-HOMEASSISTANT_IDENTIFIERS" data-key="HOMEASSISTANT_IDENTIFIERS"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_MANUFACTURER">Manufacturer</label><input type="text" id="k-HOMEASSISTANT_MANUFACTURER" data-key="HOMEASSISTANT_MANUFACTURER"/></div>
+        <div class="f"><label for="k-HOMEASSISTANT_MODEL">Model</label><input type="text" id="k-HOMEASSISTANT_MODEL" data-key="HOMEASSISTANT_MODEL"/></div>
+        <details>
+            <summary>Schedule and delivery</summary>
+            <div class="f"><label for="k-HOMEASSISTANT_CRON">Publish on a schedule</label><input type="checkbox" class="sw" id="k-HOMEASSISTANT_CRON" data-key="HOMEASSISTANT_CRON"/></div>
+            <div class="f"><label for="k-HOMEASSISTANT_CRONTAB">Crontab expression</label><input type="text" id="k-HOMEASSISTANT_CRONTAB" data-key="HOMEASSISTANT_CRONTAB"/></div>
+            <div class="f"><label for="k-HOMEASSISTANT_RETAIN">Retain</label><input type="text" id="k-HOMEASSISTANT_RETAIN" data-key="HOMEASSISTANT_RETAIN"/></div>
+            <div class="f"><label for="k-HOMEASSISTANT_QOS">QoS</label><input type="text" inputmode="numeric" id="k-HOMEASSISTANT_QOS" data-key="HOMEASSISTANT_QOS"/></div>
+        </details>
+
+        <details>
+            <summary>Raw MQTT topics</summary>
+            <p class="hint">Independent of Home Assistant discovery: publishes device info, stream links, camera settings and telemetry as plain topics.</p>
+
+            <h3>Device info</h3>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_ENABLE">Enable</label><input type="checkbox" class="sw" id="k-MQTT_ADV_INFO_GLOBAL_ENABLE" data-key="MQTT_ADV_INFO_GLOBAL_ENABLE"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_BOOT">Publish at boot</label><input type="checkbox" class="sw" id="k-MQTT_ADV_INFO_GLOBAL_BOOT" data-key="MQTT_ADV_INFO_GLOBAL_BOOT"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_CRON">Publish on a schedule</label><input type="checkbox" class="sw" id="k-MQTT_ADV_INFO_GLOBAL_CRON" data-key="MQTT_ADV_INFO_GLOBAL_CRON"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_CRONTAB">Crontab expression</label><input type="text" id="k-MQTT_ADV_INFO_GLOBAL_CRONTAB" data-key="MQTT_ADV_INFO_GLOBAL_CRONTAB"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_TOPIC">Topic</label><input type="text" id="k-MQTT_ADV_INFO_GLOBAL_TOPIC" data-key="MQTT_ADV_INFO_GLOBAL_TOPIC"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_RETAIN">Retain</label><input type="text" id="k-MQTT_ADV_INFO_GLOBAL_RETAIN" data-key="MQTT_ADV_INFO_GLOBAL_RETAIN"/></div>
+            <div class="f"><label for="k-MQTT_ADV_INFO_GLOBAL_QOS">QoS</label><input type="text" inputmode="numeric" id="k-MQTT_ADV_INFO_GLOBAL_QOS" data-key="MQTT_ADV_INFO_GLOBAL_QOS"/></div>
+
+            <h3>Stream links</h3>
+            <div class="f"><label for="k-MQTT_ADV_LINK_ENABLE">Enable</label><input type="checkbox" class="sw" id="k-MQTT_ADV_LINK_ENABLE" data-key="MQTT_ADV_LINK_ENABLE"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_BOOT">Publish at boot</label><input type="checkbox" class="sw" id="k-MQTT_ADV_LINK_BOOT" data-key="MQTT_ADV_LINK_BOOT"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_CRON">Publish on a schedule</label><input type="checkbox" class="sw" id="k-MQTT_ADV_LINK_CRON" data-key="MQTT_ADV_LINK_CRON"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_CRONTAB">Crontab expression</label><input type="text" id="k-MQTT_ADV_LINK_CRONTAB" data-key="MQTT_ADV_LINK_CRONTAB"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_TOPIC">Topic</label><input type="text" id="k-MQTT_ADV_LINK_TOPIC" data-key="MQTT_ADV_LINK_TOPIC"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_RETAIN">Retain</label><input type="text" id="k-MQTT_ADV_LINK_RETAIN" data-key="MQTT_ADV_LINK_RETAIN"/></div>
+            <div class="f"><label for="k-MQTT_ADV_LINK_QOS">QoS</label><input type="text" inputmode="numeric" id="k-MQTT_ADV_LINK_QOS" data-key="MQTT_ADV_LINK_QOS"/></div>
+
+            <h3>Camera settings</h3>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_ENABLE">Enable</label><input type="checkbox" class="sw" id="k-MQTT_ADV_CAMERA_SETTING_ENABLE" data-key="MQTT_ADV_CAMERA_SETTING_ENABLE"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_BOOT">Publish at boot</label><input type="checkbox" class="sw" id="k-MQTT_ADV_CAMERA_SETTING_BOOT" data-key="MQTT_ADV_CAMERA_SETTING_BOOT"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_CRON">Publish on a schedule</label><input type="checkbox" class="sw" id="k-MQTT_ADV_CAMERA_SETTING_CRON" data-key="MQTT_ADV_CAMERA_SETTING_CRON"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_CRONTAB">Crontab expression</label><input type="text" id="k-MQTT_ADV_CAMERA_SETTING_CRONTAB" data-key="MQTT_ADV_CAMERA_SETTING_CRONTAB"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_TOPIC">Topic</label><input type="text" id="k-MQTT_ADV_CAMERA_SETTING_TOPIC" data-key="MQTT_ADV_CAMERA_SETTING_TOPIC"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_RETAIN">Retain</label><input type="text" id="k-MQTT_ADV_CAMERA_SETTING_RETAIN" data-key="MQTT_ADV_CAMERA_SETTING_RETAIN"/></div>
+            <div class="f"><label for="k-MQTT_ADV_CAMERA_SETTING_QOS">QoS</label><input type="text" inputmode="numeric" id="k-MQTT_ADV_CAMERA_SETTING_QOS" data-key="MQTT_ADV_CAMERA_SETTING_QOS"/></div>
+
+            <h3>Telemetry</h3>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_ENABLE">Enable</label><input type="checkbox" class="sw" id="k-MQTT_ADV_TELEMETRY_ENABLE" data-key="MQTT_ADV_TELEMETRY_ENABLE"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_BOOT">Publish at boot</label><input type="checkbox" class="sw" id="k-MQTT_ADV_TELEMETRY_BOOT" data-key="MQTT_ADV_TELEMETRY_BOOT"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_CRON">Publish on a schedule</label><input type="checkbox" class="sw" id="k-MQTT_ADV_TELEMETRY_CRON" data-key="MQTT_ADV_TELEMETRY_CRON"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_CRONTAB">Crontab expression</label><input type="text" id="k-MQTT_ADV_TELEMETRY_CRONTAB" data-key="MQTT_ADV_TELEMETRY_CRONTAB"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_TOPIC">Topic</label><input type="text" id="k-MQTT_ADV_TELEMETRY_TOPIC" data-key="MQTT_ADV_TELEMETRY_TOPIC"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_RETAIN">Retain</label><input type="text" id="k-MQTT_ADV_TELEMETRY_RETAIN" data-key="MQTT_ADV_TELEMETRY_RETAIN"/></div>
+            <div class="f"><label for="k-MQTT_ADV_TELEMETRY_QOS">QoS</label><input type="text" inputmode="numeric" id="k-MQTT_ADV_TELEMETRY_QOS" data-key="MQTT_ADV_TELEMETRY_QOS"/></div>
+        </details>
+    </div>
+
+    <div class="actions"><button class="primary" data-save="1">Save</button></div>
+</section>
+
+<!-- ------------------------------------------------------------ System -->
+<section id="view-system" hidden>
+    <h2>Identity and time</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-HOSTNAME">Hostname</label><input type="text" id="k-HOSTNAME" data-key="HOSTNAME" placeholder="empty = derived from MAC"/></div>
+        <div class="f"><label for="tz-search">Find timezone</label><input type="text" id="tz-search" list="tz-list" placeholder="Europe/Rome" autocomplete="off"/></div>
+        <div class="f"><label for="k-TIMEZONE">TZ string</label><input type="text" id="k-TIMEZONE" data-key="TIMEZONE"/></div>
+        <div class="f"><label for="k-NTPD">NTP client</label><input type="checkbox" class="sw" id="k-NTPD" data-key="NTPD"/></div>
+        <div class="f"><label for="k-NTP_SERVER">NTP server</label><input type="text" id="k-NTP_SERVER" data-key="NTP_SERVER"/></div>
+        <datalist id="tz-list"></datalist>
+    </div>
+
+    <h2>Services</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-HTTPD">Web server</label><input type="checkbox" class="sw" id="k-HTTPD" data-key="HTTPD"/></div>
+        <div class="f"><label for="k-HTTPD_PORT">Web server port</label><input type="text" inputmode="numeric" id="k-HTTPD_PORT" data-key="HTTPD_PORT"/></div>
+        <div class="f"><label for="k-MDNSD">mDNS responder</label><input type="checkbox" class="sw" id="k-MDNSD" data-key="MDNSD"/></div>
+        <div class="f"><label for="k-SSHD">SSH server</label><input type="checkbox" class="sw" id="k-SSHD" data-key="SSHD"/></div>
+        <div class="f"><label for="k-SSH_PASSWORD">SSH root password</label><input type="password" id="k-SSH_PASSWORD" data-key="SSH_PASSWORD" autocomplete="new-password"/></div>
+        <div class="f"><label for="k-TELNETD">Telnet server</label><input type="checkbox" class="sw" id="k-TELNETD" data-key="TELNETD"/></div>
+        <div class="f"><label for="k-DISABLE_CLOUD">Disable Yi cloud</label><input type="checkbox" class="sw" id="k-DISABLE_CLOUD" data-key="DISABLE_CLOUD"/></div>
+        <div class="f"><label for="k-REC_WITHOUT_CLOUD">Record with cloud disabled</label><input type="checkbox" class="sw" id="k-REC_WITHOUT_CLOUD" data-key="REC_WITHOUT_CLOUD"/></div>
+        <p class="hint">SSH refuses every login while the root password is empty, which is the shipped default. Set one only if you want shell access.</p>
+    </div>
+
+    <h2>Credentials</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-USERNAME">Username</label><input type="text" id="k-USERNAME" data-key="USERNAME" autocomplete="off"/></div>
+        <div class="f"><label for="k-PASSWORD">Password</label><input type="password" id="k-PASSWORD" data-key="PASSWORD" autocomplete="new-password"/></div>
+        <p class="hint">One pair guards the web UI, RTSP and ONVIF together, so setting it means updating Home Assistant in three places. Empty means no authentication on any of them.</p>
+    </div>
+
+    <h2>Network</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-STATIC_IP">Static IP</label><input type="text" id="k-STATIC_IP" data-key="STATIC_IP" placeholder="empty = DHCP"/></div>
+        <div class="f"><label for="k-STATIC_MASK">Netmask</label><input type="text" id="k-STATIC_MASK" data-key="STATIC_MASK"/></div>
+        <div class="f"><label for="k-STATIC_GW">Gateway</label><input type="text" id="k-STATIC_GW" data-key="STATIC_GW"/></div>
+        <div class="f"><label for="k-STATIC_DNS1">DNS 1</label><input type="text" id="k-STATIC_DNS1" data-key="STATIC_DNS1"/></div>
+        <div class="f"><label for="k-STATIC_DNS2">DNS 2</label><input type="text" id="k-STATIC_DNS2" data-key="STATIC_DNS2"/></div>
+    </div>
+
+    <h2>Storage and tuning</h2>
+    <div class="card" data-conf="system">
+        <div class="f"><label for="k-FREE_SPACE">Keep SD card free (%)</label><input type="text" inputmode="numeric" id="k-FREE_SPACE" data-key="FREE_SPACE"/></div>
+        <div class="f"><label for="k-SWAP_FILE">Swap file</label><input type="checkbox" class="sw" id="k-SWAP_FILE" data-key="SWAP_FILE"/></div>
+        <div class="f"><label for="k-SWAP_SWAPPINESS">Swappiness</label><input type="text" inputmode="numeric" id="k-SWAP_SWAPPINESS" data-key="SWAP_SWAPPINESS"/></div>
+        <div class="f"><label for="k-KERNEL_TUNING">Kernel tuning</label><input type="checkbox" class="sw" id="k-KERNEL_TUNING" data-key="KERNEL_TUNING"/></div>
+        <div class="f"><label for="k-DEBUG_LOG">Debug log</label><input type="checkbox" class="sw" id="k-DEBUG_LOG" data-key="DEBUG_LOG"/></div>
+        <div class="f col"><label for="k-CRONTAB">Crontab</label><textarea id="k-CRONTAB" data-key="CRONTAB" rows="4"></textarea></div>
+        <p class="hint">Recordings are pruned oldest-first once free space drops below that percentage. Zero disables the prune, and a full card takes the stream down with it.</p>
+    </div>
+
+    <div class="actions"><button class="primary" data-save="1">Save</button></div>
+
+    <h2>Wi-Fi</h2>
+    <div class="card">
+        <div class="f"><label for="wifi-list">Network</label><select id="wifi-list"><option value="">not scanned</option></select></div>
+        <div class="f" id="wifi-manual-row" hidden><label for="wifi-manual">SSID</label><input type="text" id="wifi-manual"/></div>
+        <div class="f"><label for="wifi-pw">Password</label><input type="password" id="wifi-pw" autocomplete="new-password"/></div>
+        <div class="f"><label for="wifi-pw2">Repeat password</label><input type="password" id="wifi-pw2" autocomplete="new-password"/></div>
+        <div class="actions"><button id="btn-wifi-scan">Scan</button><button id="btn-wifi-save" class="primary">Save Wi-Fi</button></div>
+    </div>
+
+    <h2>Maintenance</h2>
+    <div class="card">
+        <div class="f"><label>Configuration backup</label><button id="btn-backup">Download</button></div>
+        <div class="f"><label for="restore-file">Restore a backup</label><span><input type="file" id="restore-file" accept=".tar.bz2"/> <button id="btn-restore">Upload</button></span></div>
+        <div class="f"><label>Restart the camera</label><button id="btn-reboot">Reboot</button></div>
+        <div class="f"><label>Reset yi-hack settings to defaults</label><button id="btn-reset" class="danger">Factory reset</button></div>
+        <p class="hint">Firmware upgrade over HTTP was removed. It pulled releases straight from the upstream project, so one unauthenticated click replaced this build and every hardening decision in it. Flash from the SD card instead.</p>
+    </div>
+</section>
+
+</main>
+
+<div id="toast" hidden></div>
+
+<script src="js/all.js"></script>
+</body>
 </html>

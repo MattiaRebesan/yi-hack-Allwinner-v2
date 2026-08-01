@@ -216,28 +216,9 @@ start_onvif()
         echo "" >> $ONVIF_SRVD_CONF
     fi
 
-    if [[ $MODEL_SUFFIX == "r30gb" ]] || [[ $MODEL_SUFFIX == "r35gb" ]] || [[ $MODEL_SUFFIX == "r37gb" ]] || [[ $MODEL_SUFFIX == "r40gb" ]] || [[ $MODEL_SUFFIX == "h51ga" ]] || [[ $MODEL_SUFFIX == "h52ga" ]] || [[ $MODEL_SUFFIX == "h60ga" ]] || [[ $MODEL_SUFFIX == "q321br_lsx" ]] || [[ $MODEL_SUFFIX == "qg311r" ]] || [[ $MODEL_SUFFIX == "b091qp" ]] ; then
-        echo "#PTZ" >> $ONVIF_SRVD_CONF
-        echo "ptz=1" >> $ONVIF_SRVD_CONF
-        echo "max_step_x=360" >> $ONVIF_SRVD_CONF
-        echo "max_step_y=180" >> $ONVIF_SRVD_CONF
-        echo "get_position=/tmp/sd/yi-hack/bin/ipc_cmd -g" >> $ONVIF_SRVD_CONF
-        echo "is_moving=/tmp/sd/yi-hack/bin/ipc_cmd -u" >> $ONVIF_SRVD_CONF
-        echo "move_left=/tmp/sd/yi-hack/bin/ipc_cmd -m left" >> $ONVIF_SRVD_CONF
-        echo "move_right=/tmp/sd/yi-hack/bin/ipc_cmd -m right" >> $ONVIF_SRVD_CONF
-        echo "move_up=/tmp/sd/yi-hack/bin/ipc_cmd -m up" >> $ONVIF_SRVD_CONF
-        echo "move_down=/tmp/sd/yi-hack/bin/ipc_cmd -m down" >> $ONVIF_SRVD_CONF
-        echo "move_stop=/tmp/sd/yi-hack/bin/ipc_cmd -m stop" >> $ONVIF_SRVD_CONF
-        echo "move_preset=/tmp/sd/yi-hack/bin/ipc_cmd -p %d" >> $ONVIF_SRVD_CONF
-        echo "goto_home_position=/tmp/sd/yi-hack/bin/ipc_cmd -p 0" >> $ONVIF_SRVD_CONF
-        echo "set_preset=/tmp/sd/yi-hack/script/ptz_presets.sh -a add_preset -n %d -m %s" >> $ONVIF_SRVD_CONF
-        echo "set_home_position=/tmp/sd/yi-hack/script/ptz_presets.sh -a set_home_position" >> $ONVIF_SRVD_CONF
-        echo "remove_preset=/tmp/sd/yi-hack/script/ptz_presets.sh -a del_preset -n %d" >> $ONVIF_SRVD_CONF
-        echo "jump_to_abs=/tmp/sd/yi-hack/bin/ipc_cmd -j %f,%f" >> $ONVIF_SRVD_CONF
-        echo "jump_to_rel=/tmp/sd/yi-hack/bin/ipc_cmd -J %f,%f" >> $ONVIF_SRVD_CONF
-        echo "get_presets=/tmp/sd/yi-hack/script/ptz_presets.sh -a get_presets" >> $ONVIF_SRVD_CONF
-        echo "" >> $ONVIF_SRVD_CONF
-    fi
+    # The PTZ block upstream emits here was gated on ten model suffixes, none
+    # of them y623. This camera has no motors; onvif_simple_server would have
+    # advertised pan/tilt commands that ipc_cmd cannot carry out.
 
     echo "#EVENT" >> $ONVIF_SRVD_CONF
     echo "events=3" >> $ONVIF_SRVD_CONF

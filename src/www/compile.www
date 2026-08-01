@@ -7,6 +7,10 @@ compress_html()
 
     echo "Compressing $SRC..."
     awk -f ./httpd/tools/remcomm.awk "$SRC" > ./_install/www/tmp.html
+    # libxml's HTML parser predates HTML5, so it prints "Tag section invalid"
+    # and friends for header/nav/main/section/details/summary/datalist. It
+    # still exits 0 and still copies those elements through verbatim - tag,
+    # attribute and id inventories were diffed and match. Warnings only.
     xmllint --html --noblanks ./_install/www/tmp.html > "$DST"
     rm ./_install/www/tmp.html
 }
@@ -20,17 +24,14 @@ mkdir -p ./_install/www/cgi-bin
 mkdir -p ./_install/www/img
 mkdir -p ./_install/www/css
 mkdir -p ./_install/www/js
-mkdir -p ./_install/www/pages
 
 echo "Compressing CSS files..."
-#find ./httpd/htdocs/css/* ! -name all.css -exec cat {} \+  > ./_install/www/htdocs/css/tmp.css
-cat ./httpd/htdocs/css/normalize.min.css ./httpd/htdocs/css/skeleton.min.css ./httpd/htdocs/css/custom.css > ./_install/www/css/tmp.css
-yui-compressor --type css -o ./_install/www/css/all.css ./_install/www/css/tmp.css
-rm ./_install/www/css/tmp.css
+yui-compressor --type css -o ./_install/www/css/all.css ./httpd/htdocs/css/custom.css
 
+# yui-compressor is Rhino-based and rejects ES6. Both files are ES5 for that
+# reason; a stray arrow function fails the build here and nowhere else.
 echo "Compressing JS files..."
-cp ./httpd/htdocs/js/jquery.min.js ./_install/www/js/jquery.min.js
-cat ./httpd/htdocs/js/utils.js ./httpd/htdocs/js/app.js ./httpd/htdocs/js/modules/*.js > ./_install/www/js/tmp.js
+cat ./httpd/htdocs/js/dom.js ./httpd/htdocs/js/app.js > ./_install/www/js/tmp.js
 yui-compressor -v --type js -o ./_install/www/js/all.js ./_install/www/js/tmp.js
 rm ./_install/www/js/tmp.js
 
@@ -38,11 +39,8 @@ echo "Compressing HTML files..."
 
 compress_html ./httpd/htdocs/index.html ./_install/www/index.html
 
-# Compress pages
-for PAGE in ./httpd/htdocs/pages/*.html ; do
-    PAGE_NAME="${PAGE##*/}"
-    compress_html ./httpd/htdocs/pages/$PAGE_NAME ./_install/www/pages/$PAGE_NAME
-done
+echo "Copying the timezone table..."
+cp ./httpd/htdocs/tz.json ./_install/www/tz.json
 
 echo "Copying image files..."
 cp -R ./httpd/htdocs/img/. ./_install/www/img/

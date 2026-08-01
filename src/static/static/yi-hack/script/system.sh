@@ -4,7 +4,6 @@ CONF_FILE="etc/system.conf"
 
 YI_PREFIX="/home/app"
 YI_HACK_PREFIX="/tmp/sd/yi-hack"
-YI_HACK_UPGRADE_PATH="/tmp/sd/.fw_upgrade"
 START_STOP_SCRIPT=$YI_HACK_PREFIX/script/service.sh
 
 YI_HACK_VER=$(cat /tmp/sd/yi-hack/version)
@@ -102,23 +101,12 @@ rm -f $YI_HACK_PREFIX/core
 
 touch /tmp/httpd.conf
 
-if [ -f $YI_HACK_UPGRADE_PATH/yi-hack/fw_upgrade_in_progress ]; then
-    log "Upgrade in progress"
-    echo "#!/bin/sh" > /tmp/fw_upgrade_2p.sh
-    echo "# Complete fw upgrade and restore configuration" >> /tmp/fw_upgrade_2p.sh
-    echo "sleep 1" >> /tmp/fw_upgrade_2p.sh
-    echo "cd $YI_HACK_UPGRADE_PATH" >> /tmp/fw_upgrade_2p.sh
-    echo "cp -rf * .." >> /tmp/fw_upgrade_2p.sh
-    echo "cd .." >> /tmp/fw_upgrade_2p.sh
-    echo "rm -rf $YI_HACK_UPGRADE_PATH" >> /tmp/fw_upgrade_2p.sh
-    echo "rm $YI_HACK_PREFIX/fw_upgrade_in_progress" >> /tmp/fw_upgrade_2p.sh
-    echo "sync" >> /tmp/fw_upgrade_2p.sh
-    echo "sync" >> /tmp/fw_upgrade_2p.sh
-    echo "sync" >> /tmp/fw_upgrade_2p.sh
-    echo "reboot" >> /tmp/fw_upgrade_2p.sh
-    sh /tmp/fw_upgrade_2p.sh
-    exit
-fi
+# Upstream's second-phase firmware upgrade ran here: it copied whatever
+# cgi-bin/fw_upgrade.sh had staged in /tmp/sd/.fw_upgrade over the live
+# install and rebooted. Both halves are gone. The CGI fetched releases from
+# the upstream GitHub repository over an unauthenticated port 80, so one
+# click replaced this build - and every hardening decision in it - with
+# stock yi-hack. Flash from the SD card instead.
 
 $YI_HACK_PREFIX/script/check_conf.sh
 

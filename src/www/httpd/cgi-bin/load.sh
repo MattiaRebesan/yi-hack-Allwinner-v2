@@ -129,14 +129,4 @@ else
     ipc_cmd -r on
 fi
 
-if [[ $(get_config CRUISE) == "off" ]] ; then
-    ipc_cmd -C off
-elif [[ $(get_config CRUISE) == "presets" ]] ; then
-    ipc_cmd -C on
-    sleep 0.5
-    ipc_cmd -C presets
-elif [[ $(get_config CRUISE) == "360" ]] ; then
-    ipc_cmd -C on
-    sleep 0.5
-    ipc_cmd -C 360
-fi
+# CRUISE went with the PTZ prune - y623 has nothing to cruise with.

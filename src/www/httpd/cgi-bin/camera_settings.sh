@@ -19,7 +19,9 @@ fi
 
 CONF_LAST="CONF_LAST"
 
-for I in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+# One iteration per query parameter the UI sends. Was 15; the cruise
+# parameter went with the PTZ prune, since y623 has no motors to cruise.
+for I in 1 2 3 4 5 6 7 8 9 10 11 12 13 14
 do
     CONF="$(echo $QUERY_STRING | cut -d'&' -f$I | cut -d'=' -f1)"
     VAL="$(echo $QUERY_STRING | cut -d'&' -f$I | cut -d'=' -f2)"
@@ -123,18 +125,6 @@ do
             ipc_cmd -r off
         else
             ipc_cmd -r on
-        fi
-    elif [ "$CONF" == "cruise" ] ; then
-        if [ "$VAL" == "no" ]; then
-            ipc_cmd -C off
-        elif [ "$VAL" == "presets" ]; then
-            ipc_cmd -C on
-            sleep 0.5
-            ipc_cmd -C presets
-        elif [ "$VAL" == "360" ]; then
-            ipc_cmd -C on
-            sleep 0.5
-            ipc_cmd -C 360
         fi
     fi
     sleep 0.5

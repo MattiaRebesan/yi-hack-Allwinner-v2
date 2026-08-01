@@ -54,15 +54,15 @@ The full current list:
 | `.gitmodules` | 6 submodule entries removed | Keep ours. |
 | `src/static/static/yi-hack/etc/system.conf` | `TELNETD=no`, `DISABLE_CLOUD=yes`, `RTSP_AUDIO=aac`, `FREE_SPACE=15`; all `FTP_*` and `EVENTS_TIME` gone | Keep our values. Add any genuinely new upstream key, then mirror it into `check_conf.sh`. |
 | `src/static/static/yi-hack/script/check_conf.sh` | Must list exactly the keys `system.conf` defines | **Always resolve in lockstep with `system.conf`.** A key in one and not the other is a real bug. |
-| `src/static/static/yi-hack/script/system.sh` | dropbear `-B` removed; empty-`SSH_PASSWORD` warning | Keep ours. Re-check the dropbear line by eye after every merge — it is the single most important diff in the fork. |
-| `src/static/static/yi-hack/script/service.sh` | Dead `RTSP_ALT` branches for `alternative`/`go2rtc` removed | Keep ours. |
+| `src/static/static/yi-hack/script/system.sh` | dropbear `-B` removed; empty-`SSH_PASSWORD` warning; **second-phase firmware-upgrade block and `YI_HACK_UPGRADE_PATH` removed** | Keep ours. Re-check the dropbear line by eye after every merge — it is the single most important diff in the fork. Never let the `/tmp/sd/.fw_upgrade` block back in; see [NOT-DONE.md](NOT-DONE.md#online-firmware-upgrade--removed-as-a-security-fix). |
+| `src/static/static/yi-hack/script/service.sh` | Dead `RTSP_ALT` branches for `alternative`/`go2rtc` removed; **the whole PTZ block removed** | Keep ours. The PTZ block was gated on ten model suffixes, none of them `y623` — reinstating it advertises pan/tilt over ONVIF that the hardware cannot perform. |
 | `src/static/static/yi-hack/script/wd.sh` | Watchdog no longer watches removed daemons | Keep ours; add upstream's new entries only for daemons that still exist here. |
 | `src/dropbear/localoptions.h` | `DROPBEAR_SFTPSERVER 0` instead of `SFTPSERVER_PATH` | Keep ours — the binary is not on the card. |
 | `src/dropbear/init.dropbear` | `--disable-harden` **kept** (upstream default) | Deliberate; see [NOT-DONE.md](NOT-DONE.md#dropbear-compiler-hardening--tried-reverted). Don't "fix" it. |
 | `src/dropbear/qemutest.dropbear` | Prints the binary's output instead of piping into `grep` | Keep ours — it is a diagnostic improvement, worth upstreaming. |
 | `src/busybox/.config` | `ftpd` / `ftpget` / `ftpput` / `tcpsvd` applets switched off | Keep ours. (`telnetd` was already off upstream — the telnet daemon on the camera is the stock one, gated by `TELNETD` in `system.conf`.) |
 | `src/busybox/install.busybox` | Stubs for those applets removed | Keep ours, and check any new stub name against `CONFIG_<NAME>=y` in `.config` — a stub for a disabled applet is a 30-byte file pointing at nothing. |
-| `src/www/httpd/**` (index, `configurations.html`, `configurations.js`, `get_configs.sh`, `set_configs.sh`, `service.sh`, `reset.sh`, `status.json`) | UI and CGIs for removed features stripped | Keep ours. Don't let a merge re-add a settings row for a daemon that no longer ships. |
+| `src/www/httpd/**` | **Front-end rewritten from scratch.** jQuery, the `?page=` router, `js/utils.js`, all 13 `js/modules/*.js` and all 13 `htdocs/pages/*.html` are gone, replaced by one `index.html` with five `<section>` views plus `js/dom.js` + `js/app.js` (vanilla ES5). `cgi-bin/ptz.sh`, `preset.sh`, `fw_upgrade.sh` and `hostname.js` deleted; `status.json`, `camera_settings.sh` and `load.sh` pruned of PTZ. | **Always keep ours, wholesale.** There is no meaningful three-way merge between this and upstream's SPA — take upstream's file only if you are deliberately reverting the rewrite. New upstream *CGI* endpoints can be cherry-picked; new upstream *pages* cannot. |
 | `src/onvif_simple_server/init.onvif_simple_server` | Build tweak | Take upstream unless it breaks the build. |
 | `src/static/static/yi-hack/bin/cloudAPI` | Local change | Inspect; usually keep ours. |
 
@@ -75,11 +75,13 @@ Fork-only files, which never conflict: `NOT-DONE.md`, `UPSTREAM.md`,
 grep -n 'dropbear -R' src/static/static/yi-hack/script/system.sh
 grep -nE '^(TELNETD|DISABLE_CLOUD|RTSP_AUDIO|FREE_SPACE)=' \
      src/static/static/yi-hack/etc/system.conf
+grep -rn 'fw_upgrade\|jquery\|pages/' src/www src/static/static/yi-hack/script
 ```
 
 Expect `dropbear -R -p 0.0.0.0:22` with no `-B`, and `no` / `yes` / `aac` / `15`.
 A merge that quietly restores `-B` gives you blank-password root SSH again and
-nothing will complain.
+nothing will complain. The third grep must return nothing but comments — a hit
+in live code means the merge dragged the old front-end or the self-updater back.
 
 Then diff the key sets, which is the failure mode `check_conf.sh` cannot catch
 by itself:

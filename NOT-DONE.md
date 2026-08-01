@@ -39,6 +39,58 @@ is the stream dying. The cron is now the only backstop, so it stays.
 
 ---
 
+## Things removed that you might miss
+
+### Online firmware upgrade — removed as a security fix
+
+**Removed:** `www/cgi-bin/fw_upgrade.sh`, the Maintenance page's "Online FW
+upgrade" block, and the second-phase installer in
+`script/system.sh` (`YI_HACK_UPGRADE_PATH="/tmp/sd/.fw_upgrade"` plus the boot
+block that copied whatever was staged there over the live install).
+
+**Why it is a security fix, not a convenience cut:** the CGI fetched
+`api.github.com/repos/roleoroleo/yi-hack-Allwinner-v2/releases/latest` and
+installed `${MODEL_SUFFIX}_${LATEST_FW}.tgz` **from upstream**. One click
+replaced this build — and every hardening decision in it — with stock
+yi-hack: FTP back, telnet back, cloud phone-home back, blank-password root
+SSH back. Port 80 has no authentication (owner's call, below), so *anything on
+the LAN* could trigger that with a single unauthenticated GET, and the camera
+would come back up as a different, weaker device with the same IP.
+
+The two halves had to go together. Deleting only the CGI leaves a boot-time
+installer that trusts an unauthenticated path on a world-writable card;
+deleting only the boot block leaves a CGI that stages a payload nothing
+consumes.
+
+**Cost:** upgrades are SD-card flashes now — `scripts/flash-sd.sh`. That is
+the same operation the fork already required for anything that changes a
+config default, so in practice nothing was lost.
+
+### PTZ — removed entirely, it was already dead
+
+**Removed:** `cgi-bin/ptz.sh`, `cgi-bin/preset.sh`,
+`script/ptz_presets.sh`, the PTZ page and its 225 lines of JS, the `CRUISE`
+row and its handling in `camera_settings.sh` and `load.sh`, the `ptz` field in
+`status.json`, and — beyond the plan — the **whole PTZ block in
+`service.sh`**, not just the `ptz_presets.sh` call sites.
+
+**Why the whole block:** it was gated on
+`r30gb|r35gb|r37gb|r40gb|h51ga|h52ga|h60ga|q321br_lsx|qg311r|b091qp`. `y623`
+is in none of them, so every line inside was unreachable on this hardware.
+What it *did* do on the models it covers is hand `onvif_simple_server` a
+PTZ profile — so leaving it would have meant advertising pan/tilt commands
+over ONVIF that `ipc_cmd` cannot carry out. Home Assistant would show motor
+controls that silently do nothing.
+
+The camera has no motors. `status.json` already answered `"ptz":"no"` before
+any of this was touched; the UI was the only thing pretending otherwise.
+
+**Left alone:** the `ptz_preset)` case in
+`mqtt_advertise/mqtt_set_config.sh` and the PTZ keys in
+`mqtt-config/validate.c` — same reasoning as the `validate.c` entry below.
+
+---
+
 ## Things the owner decided against
 
 ### HTTP authentication — left off, deliberately
@@ -202,6 +254,38 @@ that list by hand.
 Not a decision so much as a consequence: `thumb.sh` needed `minimp4_yi` and
 `create_avi.sh` shipped from `mjpeg-avi`, both removed in Stage 2. Accepted —
 neither has a Home Assistant use.
+
+### Saving a setting still needs a reboot — the UI now says so instead
+
+**Proposed:** make `cgi-bin/set_configs.sh` restart the affected daemon so
+"Save" means "applied".
+
+**Why not:** it is a loop of `sed -i` and nothing else. Making it reload
+properly means teaching it which key belongs to which daemon and how to
+restart each one without dropping the stream — a real init system, in shell,
+in a CGI, on a camera. Getting it half right is worse than not doing it: a
+save that kills `rRTSPServer` and fails to bring it back takes the camera off
+HA until someone power-cycles it.
+
+Instead the rewritten UI tells the truth. `app.js` treats `camera.conf` as the
+one live conf — it goes through `camera_settings.sh` → `ipc_cmd`, which the
+running firmware picks up immediately — and everything else (`system.conf`,
+`mqttv4.conf`, `mqtt_advertise.conf`, Wi-Fi credentials) raises a sticky
+banner naming the file and offering a Reboot button. No more "Saved" for a
+change that has not happened.
+
+### Config restore is capped at ~9 KB by `load.sh`
+
+`cgi-bin/load.sh:24` does `if [ $CONTENT_LENGTH -gt 10000 ]; then exit; fi` —
+no headers, no body, no error. The browser sees an empty reply and cannot tell
+that apart from a crash.
+
+Not fixed in the CGI (raising the cap means auditing its hand-rolled multipart
+parser, which does `dd` arithmetic on byte offsets). The UI now refuses files
+over 9000 bytes client-side with a message that names the limit, and checks
+the response body for `successfully` rather than assuming HTTP 200 means it
+worked. A real config tarball is well under 4 KB, so the cap is not binding in
+practice — it was just silent.
 
 ### `camera.conf` is not applied at boot
 

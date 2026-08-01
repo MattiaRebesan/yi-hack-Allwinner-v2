@@ -1,422 +1,315 @@
+/*
+ * The whole stylesheet. normalize.css and skeleton.css used to sit in front
+ * of this one; the new markup uses none of skeleton's grid and the handful
+ * of resets that mattered are the four rules under "reset" below.
+ */
+
 :root {
-	--background-color: #fff !important;
-	--text-color: #000 !important;
+	--bg: #fbfbfc;
+	--card: #fff;
+	--fg: #16181d;
+	--muted: #6a707c;
+	--line: #dfe2e8;
+	--accent: #2f6fdb;
+	--danger: #c0392b;
+	--ok: #1f7a44;
+	--radius: 8px;
 }
 
 [data-theme="dark"] {
-	--background-color: #3F3F3F !important;
-	--text-color: #fff !important;
+	--bg: #16181d;
+	--card: #1e2127;
+	--fg: #e8eaee;
+	--muted: #9aa1ae;
+	--line: #2d323b;
+	--accent: #5b93f0;
+	--danger: #e4695c;
+	--ok: #4cc07f;
 }
 
-[data-theme="dark"] body {
-	background-color: var(--background-color);
-	color: var(--text-color);
+/* Follow the OS unless the user has picked a theme by hand. */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #16181d;
+		--card: #1e2127;
+		--fg: #e8eaee;
+		--muted: #9aa1ae;
+		--line: #2d323b;
+		--accent: #5b93f0;
+		--danger: #e4695c;
+		--ok: #4cc07f;
+	}
 }
 
-[data-theme="dark"] nav {
-	background-color: var(--background-color);
-	color: var(--text-color);
-}
+/* reset */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
 
 body {
+	background: var(--bg);
+	color: var(--fg);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 15px;
+	line-height: 1.45;
 	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	padding-top: 80px;
 }
 
-/* main navigation */
-nav {
+/* -------------------------------------------------------------- header */
+
+header {
+	position: sticky;
 	top: 0;
-	position: fixed;
-	width: 100%;
-	z-index: 10000;
-	background-color: var(--background-color);
-	border-bottom: 1px solid #dcdcdc;
-	transition: top .2s ease-in-out;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 10px 16px;
+	background: var(--card);
+	border-bottom: 1px solid var(--line);
 }
 
-nav ul {
+h1 {
 	margin: 0;
-	background-color: var(--background-color);
+	font-size: 16px;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
-nav ul li {
-	display: inline;
-	float: left;
-	position: relative;
-	margin: 0;
-	list-style-type: none;
+nav {
+	display: flex;
+	gap: 2px;
+	flex-wrap: wrap;
+	flex: 1;
 }
 
-nav ul li a {
-	display: inline-block;
-	padding: 14px 16px;
-	color: #757575;
-	font-size: 1.7rem;
+nav a {
+	padding: 6px 12px;
+	border-radius: var(--radius);
+	color: var(--muted);
 	text-decoration: none;
-	transition: .2s;
+	white-space: nowrap;
 }
 
-/* add caret for drop menu */
-nav ul > li a:not(:only-child):after { content: '\00a0\00a0▼'; font-size: .8rem; vertical-align: middle; }
+nav a:hover { background: var(--bg); color: var(--fg); }
+nav a.on { background: var(--accent); color: #fff; }
 
-/* sub menu */
-nav ul ul {
-	position: absolute;
-	min-width: 180px;
-	height: 0;
-	overflow: hidden; /* hide sub menu */
+#theme {
+	border: 1px solid var(--line);
+	background: var(--card);
+	border-radius: var(--radius);
+	padding: 4px 10px;
+	cursor: pointer;
 }
 
-nav ul li:hover ul {
-	height: auto;
-	overflow: visible; /* show sub menu */
-	border: 1px solid #dcdcdc;
+/* -------------------------------------------------------------- layout */
+
+main {
+	max-width: 780px;
+	margin: 0 auto;
+	padding: 16px;
 }
 
-nav ul ul li {
-	display: list-item;
-	float: none;
+h2 {
+	margin: 28px 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--muted);
 }
 
-nav ul ul li a {
-	display: block
+h3 {
+	margin: 18px 0 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--muted);
 }
 
-/* Change background color of links on hover */
-nav ul li a:hover {	
-	background-color: #eee; 
-	color: #757575;
+.card {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	padding: 4px 14px;
 }
 
-/* Hide the list item that contains the link that should open and close the topnav on small screens */
-nav ul li.icon {
-	display: none
+.f {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 9px 0;
+	border-bottom: 1px solid var(--line);
 }
 
-/* Styles for users who prefer dark mode at the OS level */
-@media (prefers-color-scheme: dark) {
-	/* defaults to dark theme */
-	body {
-	  --text-color: #eee;
-	  --bkg-color: #121212;
-	}
-	/* Override dark mode with light mode styles if the user decides to swap */
-	body.light-theme {
-	  --text-color: #222;
-	  --bkg-color: #fff;
-	}
+.f:last-child { border-bottom: 0; }
+
+.f > label {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
-/* When the screen is less than 680 pixels wide, hide all list items, except for the first one ("Home"). Show the list item that contains the link to open and close the topnav (li.icon) */
-@media screen and (max-width:880px) {
-	nav ul li:not(:first-child) { display: none; }
-	nav ul li.icon {
-		position: absolute;
-		right: 0;
-		top: 0;
-		display: inline-block;
-	}
-}
-
-/* The "mobile" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the nav look good on small screens */
-@media screen and (max-width:880px) {
-	nav.mobile ul li {
-		float: none;
-		display: inline;
-	}
-	nav.mobile ul li a {
-		display: block;
-		text-align: left;
-	}
-	nav.mobile ul li a:after {
-		content: attr(title);
-		position: relative;
-		top: -6px;
-		padding-left: 10px;
-	}
-	nav.mobile ul li ul {
-		position: relative;
-		height: auto;
-		overflow: visible;
-		padding-left: 20px;
-	}
-	nav.mobile ul li:hover ul {
-		border: none;
-	}
-}
-
-.strong {
-    font-weight: 700
-}
-
-.italic {
-    font-style: italic
-}
-
-.float-right {
-	float: right
-}
-
-.align-right {
-    text-align: right
-}
-
-.inline {
-    display: inline
-}
-
-.inline-block {
-    display: inline-block
-}
-
-.no-margin {
-    margin: 0
-}
-
-.tiny-margin {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.padded-right {
-	padding-right: 20px
-}
-
-.ios-onclick-fix {
-    cursor: pointer
-}
-
-table.ptz-table {
-    width: 35%
-}
-
-table.ptz-table tr td {
-    padding: 1px;
-    border: 0;
-    text-align: center;
-}
-
-table.padded-table tr td {
-    padding: 10px 10px 9px;
-}
-
-table.padded-table td:first-child {
-    width: 35%;
-}
-
-table.config-table td:first-child {
-	vertical-align: top;
-	padding-top: 16px;
+.f > :not(label) {
+	flex: 0 0 auto;
+	max-width: 60%;
 	text-align: right;
 }
 
-li.nav-elem-right {
-    float: right
-}
-
-/* The switch - the box around the slider */
-.switch {
-	position: relative;
+.f.col {
 	display: block;
-	width: 50px;
-	height: 30px;
-	z-index: 1;
-	margin-top: 8px;
-}
-.switch.small{
-	width: 40px;
-	height: 20px;
-}
-.switch.xs{
-	width: 25px;
-	height: 15px;
-	margin: 0;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-	display:none
-}
-
-/* The slider */
-.slider {
-	position: absolute;
-	cursor: pointer;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #ccc;
-	-webkit-transition: .4s;
-	-moz-transition: .4s;
-	transition: .4s;
-}
-
-.slider:before {
-	position: absolute;
-	content: "";
-	height: 24px;
-	width: 24px;
-	left: 4px;
-	bottom: 3px;
-	background-color: #fff;
-	-webkit-transition: .4s;
-	-moz-transition: .4s;
-	transition: .4s;
-}
-
-.switch.small .slider:before{
-	height: 15px;
-	width: 15px;
-}
-
-.switch.xs .slider:before{
-	height: 11px;
-	width: 11px;
-	bottom: 2px;
-	left: 2px;
-}
-
-input:checked + .slider {
-	background-color: #12b6ea
-}
-
-input:focus + .slider {
-	box-shadow: 0 0 1px #12b6ea
-}
-
-input:checked + .slider:before {
-	-webkit-transform: translateX(18px);
-	transform: translateX(18px);
-}
-
-.xs input:checked + .slider:before {
-	-webkit-transform: translateX(10px);
-	transform: translateX(10px);
-}
-
-/* Rounded sliders */
-.slider.round {
-	border-radius: 34px
-}
-
-.slider.round:before {
-	border-radius: 50%
-}
-
-/* Switch text */
-.switch-text{
-	left: 47px;
-	top: 3px;
-	position: relative;
-	display: block;
-	right: 0;
-	line-height: 2;
-}
-
-.switch.small .switch-text{
-	line-height: 1;
-	min-width: 150px;
-}
-
-.save-text {
-	display: inline-block;
-	min-width: 80px;
-	text-align: center;
-}
-
-.loading-text {
-	margin-top: 15px;
-	margin-bottom: 0;
-}
-
-/* Select */
-select {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	outline: 0;
-	box-shadow: none;
-	border: 0 !important;
-	background: #12b6ea;
-	background-image: none;
+.f.col > * {
+	max-width: none;
+	text-align: left;
 	width: 100%;
 }
 
-/* Remove IE arrow */
-select::-ms-expand {
-	display: none;
+.hint {
+	margin: 8px 0 12px;
+	font-size: 13px;
+	color: var(--muted);
 }
 
-/* Custom Select */
-.standard-select {
+.actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 12px 0;
+}
+
+.actions .hint { margin: 0; }
+
+details {
+	border-top: 1px solid var(--line);
+	padding: 6px 0;
+}
+
+summary {
+	cursor: pointer;
+	padding: 6px 0;
+	font-weight: 600;
+	color: var(--muted);
+}
+
+/* ------------------------------------------------------------ controls */
+
+input[type=text], input[type=password], select, textarea {
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 5px 8px;
+	width: 220px;
+	max-width: 100%;
+}
+
+textarea { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+
+input:focus, select:focus, textarea:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: -1px;
+}
+
+button {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 5px 12px;
+	cursor: pointer;
+}
+
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: var(--danger); border-color: var(--danger); }
+
+/* Checkboxes carrying .sw are rendered as toggles. */
+input.sw {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 40px;
+	height: 22px;
+	margin: 0;
+	border-radius: 11px;
+	background: var(--line);
 	position: relative;
-	width: 10em;
-	height: 3em;
-	line-height: 3;
-	background: #12b6ea;
-	overflow: hidden;
-	border-radius: .25em;
-}
-
-select {
-	flex: 1;
-	padding: 0 .5em;
-	color: #fff;
 	cursor: pointer;
+	transition: background .15s;
 }
 
-/* Arrow */
-.standard-select::after {
-	content: '\25BC';
+input.sw::after {
+	content: "";
 	position: absolute;
-	top: 0;
-	right: 0;
-	padding: 0 1em;
-	background: #33c4f8;
+	top: 2px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	transition: transform .15s;
+}
+
+input.sw:checked { background: var(--accent); }
+input.sw:checked::after { transform: translateX(18px); }
+
+code, pre {
+	font-family: ui-monospace, Menlo, Consolas, monospace;
+	font-size: 13px;
+}
+
+code {
+	overflow-wrap: anywhere;
+}
+
+pre {
+	margin: 10px 0;
+	padding: 10px;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	overflow-x: auto;
+	white-space: pre;
+}
+
+a { color: var(--accent); }
+
+#snap { margin: 10px 0; border-radius: 6px; }
+
+/* ----------------------------------------------------- banner et toast */
+
+#banner {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 10px 16px;
+	background: #fdf3d4;
+	color: #5c4708;
+	border-bottom: 1px solid #e6d59a;
+}
+
+[data-theme="dark"] #banner { background: #3b3316; color: #f0dfa8; border-bottom-color: #55491f; }
+
+#banner span { flex: 1; }
+
+#toast {
+	position: fixed;
+	left: 50%;
+	bottom: 20px;
+	transform: translateX(-50%);
+	max-width: 90vw;
+	padding: 9px 16px;
+	border-radius: var(--radius);
+	background: var(--ok);
 	color: #fff;
-	cursor: pointer;
-	pointer-events: none;
-	-webkit-transition: .25s all ease;
-	-moz-transition: .25s all ease;
-    transition: .25s all ease;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
 }
 
-/* Transition */
-.standard-select:hover::after {
-	color: #12b6ea;
-}
+#toast.bad { background: var(--danger); }
 
-#wlan_strength {
-	vertical-align: middle;
-}
-
-/* Icon Button */
-button.icon {
-	border: 0;
-}
-
-/* Div for fw 12 and ptz */
-.fw12 {
-	display: none;
-}
-
-.no_fw12 {
-	display: none;
-}
-
-.ptz {
-	display: none;
-}
-
-/* ptz icons */
-#img-al, #img-ul {
-    rotate: -90deg;
-}
-#img-ar, #img-dr {
-    rotate: 90deg;
-}
-#img-ad, #img-dl {
-    rotate: 180deg;
+@media (max-width: 560px) {
+	.f { flex-wrap: wrap; }
+	.f > :not(label) { max-width: 100%; }
 }
