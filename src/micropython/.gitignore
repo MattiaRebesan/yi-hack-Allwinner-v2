@@ -1,7 +1,0 @@
-# Ignore the install dir
-_install/
-*.tar.xz
-libffi/_include
-libffi/_install
-libffi/libffi-*
-micropython-*/

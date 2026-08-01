@@ -75,62 +75,6 @@ check_rtsp()
     fi
 }
 
-check_rtsp_alt()
-{
-    if [[ $(get_camera_config SWITCH_ON) == "yes" ]] ; then
-        #  echo "$(date +'%Y-%m-%d %H:%M:%S') - Checking RTSP process..." >> $LOG_FILE
-        LISTEN=`$YI_HACK_PREFIX/bin/netstat -an 2>&1 | grep ":$RTSP_PORT_NUMBER " | grep LISTEN | grep -c ^`
-        CPU1=`top -b -n 2 -d 1 | grep h264grabber | grep -v grep | tail -n 1 | awk '{print $8}'`
-        CPU2=`top -b -n 2 -d 1 | grep rtsp_server_yi | grep -v grep | tail -n 1 | awk '{print $8}'`
-
-        if [ $LISTEN -eq 0 ]; then
-            echo "$(date +'%Y-%m-%d %H:%M:%S') - Restarting rtsp process" >> $LOG_FILE
-            killall -q rtsp_server_yi
-            killall -q h264grabber
-            sleep 1
-            restart_rtsp
-        fi
-        if [ "$CPU1" == "" ] || [ "$CPU2" == "" ]; then
-            echo "$(date +'%Y-%m-%d %H:%M:%S') - No running processes, restarting..." >> $LOG_FILE
-            killall -q rtsp_server_yi
-            killall -q h264grabber
-            sleep 1
-            restart_rtsp
-            COUNTER=0
-        fi
-    else
-        echo "Camera is switched off, rtsp restart not needed" >> $LOG_FILE
-    fi
-}
-
-check_rtsp_go2rtc()
-{
-    if [[ $(get_camera_config SWITCH_ON) == "yes" ]] ; then
-        #  echo "$(date +'%Y-%m-%d %H:%M:%S') - Checking RTSP process..." >> $LOG_FILE
-        LISTEN=`$YI_HACK_PREFIX/bin/netstat -an 2>&1 | grep ":$RTSP_PORT_NUMBER " | grep LISTEN | grep -c ^`
-        CPU1=`top -b -n 2 -d 1 | grep h264grabber | grep -v grep | tail -n 1 | awk '{print $8}'`
-        CPU2=`top -b -n 2 -d 1 | grep go2rtc | grep -v grep | tail -n 1 | awk '{print $8}'`
-
-        if [ $LISTEN -eq 0 ]; then
-            echo "$(date +'%Y-%m-%d %H:%M:%S') - Restarting rtsp process" >> $LOG_FILE
-            killall -q go2rtc
-            killall -q h264grabber
-            sleep 1
-            restart_rtsp
-        fi
-        if [ "$CPU1" == "" ] || [ "$CPU2" == "" ]; then
-            echo "$(date +'%Y-%m-%d %H:%M:%S') - No running processes, restarting..." >> $LOG_FILE
-            killall -q go2rtc
-            killall -q h264grabber
-            sleep 1
-            restart_rtsp
-            COUNTER=0
-        fi
-    else
-        echo "Camera is switched off, rtsp restart not needed" >> $LOG_FILE
-    fi
-}
-
 check_rmm()
 {
     #  echo "$(date +'%Y-%m-%d %H:%M:%S') - Checking rmm process..." >> $LOG_FILE
@@ -288,19 +232,11 @@ if [ ! -z $RTSP_PORT ]; then
     RTSP_PORT_NUMBER=$RTSP_PORT
 fi
 
-RTSP_ALT=$(get_config RTSP_ALT)
-
 echo "$(date +'%Y-%m-%d %H:%M:%S') - Starting RTSP watchdog..." >> $LOG_FILE
 
 while true
 do
-    if [[ "$RTSP_ALT" == "standard" ]] ; then
-        check_rtsp
-    elif [[ "$RTSP_ALT" == "alternative" ]] ; then
-        check_rtsp_alt
-    else
-        check_rtsp_go2rtc
-    fi
+    check_rtsp
     check_rmm
     check_mqtt
     check_wifi

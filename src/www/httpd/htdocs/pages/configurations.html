@@ -76,23 +76,6 @@
                         </td>
                     </tr>
                     <tr class="row">
-                        <td>RTSP server program</td>
-                        <td>
-                            <div class="standard-select">
-                                <select data-key="RTSP_ALT" id="RTSP_ALT">
-                                    <option value="standard">Standard (based on live555 library)</option>
-                                    <option value="alternative">Alternative</option>
-                                    <option value="go2rtc">go2rtc</option>
-                                </select>
-                            </div>
-                            <span class="switch-description">
-                                Select the RTSP server program.
-                                <br/>
-                                Note: go2rtc supports only aac audio.
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
                         <td>RTSP Stream</td>
                         <td>
                             <div class="standard-select">
@@ -198,19 +181,6 @@
                         </td>
                     </tr>
                     <tr class="row">
-                        <td>Snapshot for recorded video</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="SNAPSHOT_VIDEO"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Create snapshot for recorded video (CPU expensive).
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
                         <td>Force low resolution snapshot</td>
                         <td>
                             <label class="switch small">
@@ -220,77 +190,6 @@
                             </label>
                             <span class="switch-description">
                                 Take low resolution snapshots only (useful for avoiding memory problems).
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Time-lapse</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="TIMELAPSE"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Enable time-lapse snapshots.
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Time-lapse interval</td>
-                        <td>
-                            <input class="u-full-width" type="text" placeholder="" data-key="TIMELAPSE_DT" id="TIMELAPSE_DT"/>
-                            <span class="switch-description">
-                                Interval between frames (minutes: 1-6, 10, 15, 20, 30, 60, 120, 180, 240, 360, 1440).
-                                <br/>
-                                If you use 1440, please specify offset from midnight with the syntax 1440+offset (example to take snapshot at noon: 1440+720).
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Time-lapse video creation interval</td>
-                        <td>
-                            <input class="u-full-width" type="text" placeholder="" data-key="TIMELAPSE_VDT" id="TIMELAPSE_VDT"/>
-                            <span class="switch-description">
-                                Interval between video creation: too difficult to make a gui, use crontab syntax.
-                                <br/>
-                                For example: "0 0 * * *" to make a video every day at midnight.
-                                <br/>
-                                Disabled if you leave the field empty or if you enable "Time-lapse ftp push".
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Time-lapse video</td>
-                        <td>
-                            <span class="switch-description">
-                                Go to <a href="?page=timelapse">this page</a> to see time-lapse video
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Time-lapse ftp push</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="TIMELAPSE_FTP"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Send time-lapse snapshots to the ftp server (see Events page for ftp options) and remove local file.
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Overwrite ftp destination file (use same name)</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="TIMELAPSE_FTP_SAME_NAME"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Send time-lapse snapshots to the ftp server using the same name.
                             </span>
                         </td>
                     </tr>
@@ -327,23 +226,6 @@
                             </label>
                             <span class="switch-description">
                                 Enable or disable the FTP server.
-                            </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Legacy FTP</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="BUSYBOX_FTPD"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Switch to the legacy BusyBox FTP server.
-                            </span>
-                                <br/>
-                            <span class="italic">
-                                NOTE: If you are trying to disable Pure-FTPd as mentioned in <a target="_blank" href="https://github.com/shadow-1/yi-hack-v3/issues/129#issuecomment-361723075">this issue</a> you can enable this option instead of manually editing the system.sh file.
                             </span>
                         </td>
                     </tr>
@@ -410,22 +292,6 @@
                             <span class="switch-description">
                                 Enable or disable Multicast DNS Daemon.
                             </span>
-                        </td>
-                    </tr>
-                    <tr class="row">
-                        <td>Proxychains-ng</td>
-                        <td>
-                            <label class="switch small">
-                                <input type="checkbox" data-key="PROXYCHAINSNG"/>
-                                <span class="slider round"></span>
-                                <span class="switch-text"></span>
-                            </label>
-                            <span class="switch-description">
-                                Proxychains-ng is a way to bypass the region restrictions imposed by Yi when using a Chinese camera outside China. See the GitHub page for more info on how to configure it.
-                            </span>
-                            <br/>
-                            <br/>
-                            <input class="button-primary" type="button" id="button-proxy-edit" value="Edit" onclick="window.location.href='?page=proxy'"/>
                         </td>
                     </tr>
                     <tr class="row">

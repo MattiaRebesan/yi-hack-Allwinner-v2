@@ -35,22 +35,7 @@ fi
 
 printf "{\n"
 
-PROXY_LIST="0"
-PROXYCHAINS_SERVERS=
-if [ "$CONF_TYPE" == "proxychains" ] ; then
-    while IFS= read -r LINE ; do
-        if [ "$PROXY_LIST" == "1" ] ; then
-            PROXYCHAINS_SERVERS=${PROXYCHAINS_SERVERS}${LINE}";"
-        fi
-        if [ "$LINE" == "[ProxyList]" ] ; then
-            PROXY_LIST="1"
-        fi
-    done < "$CONF_FILE"
-    PROXYCHAINS_SERVERS=${PROXYCHAINS_SERVERS%?}
-    echo -e \"PROXYCHAINS_SERVERS\":\"$PROXYCHAINS_SERVERS\",
-else
-    sed '/^#/d; /^$/d; s/\\/\\\\/g; s/\"/\\"/g; s/\([^=]*\)=\(.*\)/"\1":"\2",/' "$CONF_FILE"
-fi
+sed '/^#/d; /^$/d; s/\\/\\\\/g; s/\"/\\"/g; s/\([^=]*\)=\(.*\)/"\1":"\2",/' "$CONF_FILE"
 
 if [ "$CONF_TYPE" == "system" ] ; then
     printf "\"%s\":\"%s\",\n"  "HOSTNAME" "$(cat $YI_HACK_PREFIX/etc/hostname | sed -r 's/\\/\\\\/g;s/"/\\"/g;')"

@@ -48,20 +48,10 @@ init_config()
     fi
 
     if [[ $(get_config RTSP) == "yes" ]] ; then
-        if [[ $(get_config RTSP_ALT) == "alternative" ]] ; then
-            RTSP_DAEMON="rtsp_server_yi"
-        elif [[ $(get_config RTSP_ALT) == "go2rtc" ]] ; then
-            RTSP_DAEMON="go2rtc"
-            if [ ! -f /tmp/sd/yi-hack/bin/go2rtc ]; then
-                RTSP_DAEMON="rRTSPServer"
-            fi
-        else
-            RTSP_DAEMON="rRTSPServer"
-        fi
+        RTSP_DAEMON="rRTSPServer"
 
         RTSP_AUDIO=$(get_config RTSP_AUDIO)
         if [ "$RTSP_AUDIO" == "aac" ]; then
-            H264GRABBER_AUDIO="-a"
             ONVIF_AUDIO_ENCODER="audio_encoder=aac"
         elif [ "$RTSP_AUDIO" == "pcm" ]; then
             ONVIF_AUDIO_ENCODER="audio_encoder=none"
@@ -85,15 +75,8 @@ init_config()
         fi
 
         RTSP_RES=$(get_config RTSP_STREAM)
-        RTSP_ALT=$(get_config RTSP_ALT)
         if [[ $(get_config RTSP_STI) != "yes" ]]; then
-            if [[ "$RTSP_ALT" == "standard" ]]; then
-                RTSP_G_STI=""
-                RTSP_STI="-s"
-            else
-                RTSP_G_STI="-s"
-                RTSP_STI=""
-            fi
+            RTSP_STI="-s"
         fi
     fi
 
@@ -145,72 +128,18 @@ start_rtsp()
     if [ "$1" == "low" ] || [ "$1" == "high" ] || [ "$1" == "both" ]; then
         RTSP_RES=$1
     fi
-    if [ "$2" == "aac" ]; then
-        H264GRABBER_AUDIO="-a"
-    fi
     if [ "$2" == "no" ] || [ "$2" == "yes" ] || [ "$2" == "alaw" ] || [ "$2" == "ulaw" ] || [ "$2" == "pcm" ] || [ "$2" == "aac" ] ; then
         RTSP_AUDIO=$2
         RTSP_AUDIO_OPTION="-a "$2
     fi
 
-    if [ "$RTSP_ALT" == "go2rtc" ]; then
-        echo "streams:" > /tmp/go2rtc.yaml
-        if [ "$RTSP_RES" == "high" ] || [ "$RTSP_RES" == "both" ]; then
-            echo "  ch0_0.h264:" >> /tmp/go2rtc.yaml
-            echo "    - exec:h264grabber -m $MODEL_SUFFIX $RTSP_G_STI -r high#backchannel=0" >> /tmp/go2rtc.yaml
-        fi
-        if [ "$RTSP_RES" != "low" ] && [ "$RTSP_AUDIO" == "aac" ] ; then
-            echo "    - exec:h264grabber -m $MODEL_SUFFIX -r none -a#backchannel=0" >> /tmp/go2rtc.yaml
-        fi
-        if [ "$RTSP_RES" == "low" ] || [ "$RTSP_RES" == "both" ]; then
-            echo "  ch0_1.h264:" >> /tmp/go2rtc.yaml
-            echo "    - exec:h264grabber -m $MODEL_SUFFIX $RTSP_G_STI -r low#backchannel=0" >> /tmp/go2rtc.yaml
-        fi
-        if [ "$RTSP_RES" == "low" ] && [ "$RTSP_AUDIO" == "aac" ] ; then
-            echo "    - exec:h264grabber -m $MODEL_SUFFIX -r none -a#backchannel=0" >> /tmp/go2rtc.yaml
-        fi
+    if [[ $RTSP_RES == "low" ]] || [[ $RTSP_RES == "high" ]] || [[ $RTSP_RES == "both" ]]; then
+        $RTSP_DAEMON -m $MODEL_SUFFIX -r $RTSP_RES $RTSP_STI $RTSP_AUDIO_OPTION $P_RTSP_PORT $RTSP_USER $RTSP_PASSWORD $RTSP_AUDIO_BC &
+    fi
 
-        echo "" >> /tmp/go2rtc.yaml
-        echo "api:" >> /tmp/go2rtc.yaml
-        echo "  listen: \"\"" >> /tmp/go2rtc.yaml
-        echo "" >> /tmp/go2rtc.yaml
-        echo "webrtc:" >> /tmp/go2rtc.yaml
-        echo "  listen: \"\"" >> /tmp/go2rtc.yaml
-        echo "" >> /tmp/go2rtc.yaml
-        echo "rtsp:" >> /tmp/go2rtc.yaml
-        echo "  listen: \":$RTSP_PORT\"" >> /tmp/go2rtc.yaml
-        if [ ! -z $USERNAME ]; then
-            echo "  username: \"$USERNAME\"" >> /tmp/go2rtc.yaml
-            echo "  password: \"$PASSWORD\"" >> /tmp/go2rtc.yaml
-        fi
-
-        $RTSP_DAEMON -c /tmp/go2rtc.yaml -d
-    else
-
-        if [[ $RTSP_RES == "low" ]]; then
-            if [ "$RTSP_ALT" == "alternative" ]; then
-                h264grabber -m $MODEL_SUFFIX $RTSP_G_STI -r low $H264GRABBER_AUDIO -f &
-                sleep 1
-            fi
-            $RTSP_DAEMON -m $MODEL_SUFFIX -r low $RTSP_STI $RTSP_AUDIO_OPTION $P_RTSP_PORT $RTSP_USER $RTSP_PASSWORD $RTSP_AUDIO_BC &
-        elif [[ $RTSP_RES == "high" ]]; then
-            if [ "$RTSP_ALT" == "alternative" ]; then
-                h264grabber -m $MODEL_SUFFIX $RTSP_G_STI -r high $H264GRABBER_AUDIO -f &
-                sleep 1
-            fi
-            $RTSP_DAEMON -m $MODEL_SUFFIX -r high $RTSP_STI $RTSP_AUDIO_OPTION $P_RTSP_PORT $RTSP_USER $RTSP_PASSWORD $RTSP_AUDIO_BC &
-        elif [[ $RTSP_RES == "both" ]]; then
-            if [ "$RTSP_ALT" == "alternative" ]; then
-                h264grabber -m $MODEL_SUFFIX $RTSP_G_STI -r both $H264GRABBER_AUDIO -f &
-                sleep 1
-            fi
-            $RTSP_DAEMON -m $MODEL_SUFFIX -r both $RTSP_STI $RTSP_AUDIO_OPTION $P_RTSP_PORT $RTSP_USER $RTSP_PASSWORD $RTSP_AUDIO_BC &
-        fi
-
-        WD_COUNT=$(ps | grep wd.sh | grep -v grep | grep -c ^)
-        if [ $WD_COUNT -eq 0 ]; then
-            (sleep 30; $YI_HACK_PREFIX/script/wd.sh >/dev/null) &
-        fi
+    WD_COUNT=$(ps | grep wd.sh | grep -v grep | grep -c ^)
+    if [ $WD_COUNT -eq 0 ]; then
+        (sleep 30; $YI_HACK_PREFIX/script/wd.sh >/dev/null) &
     fi
 }
 
@@ -372,42 +301,15 @@ stop_wsdd()
     killall wsd_simple_server
 }
 
+# pure-ftpd is no longer built, so busybox is the only FTP daemon available.
 start_ftpd()
 {
-    if [[ "$1" == "null" ]] ; then
-        if [[ $(get_config BUSYBOX_FTPD) == "yes" ]] ; then
-            FTPD_DAEMON="busybox"
-        else
-            FTPD_DAEMON="pure-ftpd"
-        fi
-    else
-        FTPD_DAEMON=$1
-    fi
-
-    if [[ $FTPD_DAEMON == "busybox" ]] ; then
-        tcpsvd -vE 0.0.0.0 21 ftpd -w >/dev/null &
-    elif [[ $FTPD_DAEMON == "pure-ftpd" ]] ; then
-        pure-ftpd -B
-    fi
+    tcpsvd -vE 0.0.0.0 21 ftpd -w >/dev/null &
 }
 
 stop_ftpd()
 {
-    if [[ "$1" == "null" ]] ; then
-        if [[ $(get_config BUSYBOX_FTPD) == "yes" ]] ; then
-            FTPD_DAEMON="busybox"
-        else
-            FTPD_DAEMON="pure-ftpd"
-        fi
-    else
-        FTPD_DAEMON=$1
-    fi
-
-    if [[ $FTPD_DAEMON == "busybox" ]] ; then
-        killall tcpsvd
-    elif [[ $FTPD_DAEMON == "pure-ftpd" ]] ; then
-        killall pure-ftpd
-    fi
+    killall tcpsvd
 }
 
 ps_program()
