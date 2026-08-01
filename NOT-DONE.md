@@ -60,6 +60,37 @@ Home Assistant needs updating in three places or the camera goes dark. The
 path", which is how `/onvif::` stays open, so a narrower policy that protects
 only the mutating CGIs is possible if this is ever revisited.
 
+### Dropbear compiler hardening — tried, reverted
+
+**Proposed (Stage 3):** drop `--disable-harden` from `src/dropbear/init.dropbear`
+so dropbear builds with `_FORTIFY_SOURCE=2`, `-fstack-protector-strong`, PIE,
+RELRO and BIND_NOW.
+
+**Tried it.** It *compiles* fine — the toolchain accepts every flag. The
+resulting binary then dies in the module's own smoke test:
+
+```
+./_install/dropbearmulti: ELF 32-bit LSB pie executable, ARM, EABI5 ...
+qemu: uncaught target signal 11 (Segmentation fault) - core dumped
+```
+
+**Why reverted:** PIE is the piece that breaks — `qemu-arm-static` cannot load
+the ET_DYN executable. Whether it would also fault on the real SoC is unknown,
+and there is no way to find out except flashing an SSH daemon that may not
+start. Dropbear's `configure` has no switch to keep fortify and RELRO while
+dropping PIE; the harden flags are one all-or-nothing block, and anything
+passed in `LDFLAGS` is appended *before* its `-Wl,-pie`, so it cannot be
+overridden from the outside either.
+
+The route back in, if it is ever worth it: build with hardening, skip the qemu
+test for that one module, flash, and confirm SSH on real hardware. That is a
+hardware-verified answer, not a CI one. Not worth doing for a daemon that is
+now refusing logins by default anyway.
+
+`src/dropbear/qemutest.dropbear` keeps the improvement made while diagnosing
+this: it prints the binary's output instead of piping it into `grep`, so the
+next failure explains itself.
+
 ### `MQTT=yes` as a default — left at `no`
 
 **Proposed (Stage 3):** default MQTT on, since HA is the point.
