@@ -294,46 +294,64 @@ It is only read by `www/cgi-bin/load.sh` (a web-UI action) and by
 `camera.conf` on the card by hand does nothing until something triggers a load.
 Not changed — that is upstream behaviour and rewiring it is out of scope.
 
-### The watchdog was the load
+### The watchdog was not the load (a wrong diagnosis, kept on record)
 
-Measured on hardware at `0.3.6`, over SSH: load average **1.19–1.22** with the
-CPU **54.7% idle** and only 8 KB of swap touched. Those two numbers do not
-contradict each other. This camera has **one core** (`grep -c processor
-/proc/cpuinfo` = 1), and the load was not compute — it was fork churn. The
-last-PID counter in `/proc/loadavg` advanced 3085 → 6214 in 420 s, i.e. **~7.4
-new processes per second**. The run queue never emptied, so every new fork
-queued behind the others and a shell CGI took ~0.5 s on a half-idle box.
+Measured on hardware at `0.3.6`, over SSH: load average **1.19-1.24** with the
+CPU **54.7% idle**, 8 KB of swap touched, on a **single core** (`grep -c
+processor /proc/cpuinfo` = 1). A 400-sample `ps` sweep found `sleep 10` ×368,
+`top -b -n 2 -d 1` ×26, `grep rRTSPServer` ×26, `awk '{print $8}'` ×26,
+`wpa_cli` ×7 -- almost all of it `wd.sh`, which ran every 10 s and forked a
+couple of dozen short-lived processes per pass.
 
-A 400-sample `ps` sweep attributed the churn almost entirely to `wd.sh`:
-`sleep 10` ×368, `top -b -n 2 -d 1` ×26, `grep rRTSPServer` ×26, `awk '{print
-$8}'` ×26, `wpa_cli` ×7. The watchdog ran every 10 s, and each pass forked a
-couple of dozen short-lived processes to answer questions that nothing needs
-answered sub-minute.
+I concluded the load *was* that fork churn, rewrote `wd.sh` to cut it, flashed,
+and measured again. **The load did not move**: `load_1` 0.79-2.24 around a mean
+near 1.1, `load_5` settling at 1.0-1.2, versus 1.23 before. Identical within
+noise.
 
-The expensive one was `top -b -n 2 -d 1`, used purely to read one process's
-CPU% column. It blocks a full second and walks all of `/proc` twice to do it.
-`utime+stime` from `/proc/<pid>/stat` is the same signal — if the counter has
-not moved since the previous pass, that process burned no CPU in the interval
-— for three forks and no delay.
+The reasoning was wrong, and the error is worth naming because it is easy to
+repeat. **Linux load counts tasks in R (runnable) and D (uninterruptible
+sleep) only.** A `sleep 10` sits in S, interruptible sleep, and contributes
+nothing. So the 368 `sleep` samples -- the bulk of the evidence -- were never
+load at all; they only showed that `wd.sh` spends almost all its time asleep,
+which is what a watchdog is supposed to do. The rising last-PID counter
+(~7.4 procs/sec) proved forks were happening, not that they were queueing.
 
-**What is not done, and why it matters:** the sleep was not left alone.
-Upstream's main loop sleeps only `if [ $COUNTER -eq 0 ]`, and the reason that
-was survivable is that `top` blocked for a second inside `check_rtsp` and
-paced the loop by accident. Removing `top` without adding a sleep turns the
-suspected-hang branch into a genuine busy-loop — a worse bug than the one
-being fixed. Hence `SUSPECT_INTERVAL=5`: still catches a locked
-`rRTSPServer` in under a minute, without spinning.
+What the numbers actually say: ~45% CPU utilisation would give a load near
+0.45 if every runnable task were on-CPU. The excess -- roughly 0.6-0.8 tasks
+on average -- is **D state, i.e. blocked on I/O**, which inflates load without
+consuming CPU. That is the real question, and cutting `wd.sh`'s fork rate was
+never going to answer it. `rmm` (34.3% CPU, closed-source, owns the sensor and
+feeds the frame buffer) is the floor and is not tunable from here; the D-state
+contributor is **not identified**. Candidates are the vfat SD card and the
+Wi-Fi driver. Confirming it needs `top -b` reading the `D` column, or
+`/proc/<pid>/stat` field 3, over a few minutes -- which needs a root shell,
+and SSH is closed again.
 
-Two real defects surfaced while measuring, both fixed in the same pass:
-`mqttv4` was running with `MQTT=no` in `system.conf` (upstream's `check_mqtt`
-never consults the config before restarting it), and `camera.conf` had
-`SAVE_VIDEO_ON_MOTION=yes` with `MOTION_DETECTION=no` on a build that is
-supposed to record nothing.
+`DEBUG_LOG` was ruled out on the way past: `log()` in `system.sh:39-51` is the
+only writer, every call site is boot-time, and the file is `rm -f`'d at the
+top of each boot. It is not a continuous writer and cannot explain a standing
+D-state load.
 
-**Not investigated further:** `rmm` sat at 34.3% CPU throughout. It is the
-closed-source Yi process that owns the sensor and feeds the frame buffer
-everything else reads, so it is not removable and not tunable from here. It is
-the floor for this hardware, not a regression.
+**The `wd.sh` rewrite was kept anyway**, on its own merits rather than the one
+claimed for it: it does the same checks with roughly a third of the forks and
+without blocking a second per pass on `top`, and it fixed two genuine defects
+(see below). It is a tidiness and CPU-per-pass change. **It is not a load fix,
+and the load figure is unchanged** -- do not cite it as one.
+
+Two real defects surfaced while measuring, both fixed:
+`mqttv4` was running with `MQTT=no` in `system.conf`, because upstream's
+`check_mqtt` never consults the config before restarting it; and `camera.conf`
+shipped `SAVE_VIDEO_ON_MOTION=yes` with `MOTION_DETECTION=no` on a build that
+is supposed to record nothing.
+
+**Still open on the live card:** `flash-sd.sh` carries the old card's values
+across a flash (`camera.conf` verbatim via `PRESERVE`, `system.conf` key by
+key via the merge, "your value always wins"). So the repo fix to
+`SAVE_VIDEO_ON_MOTION` did **not** reach the camera -- it still reads `yes` --
+and `DEBUG_LOG` still reads `yes` against a build default of `no`. That is the
+merge working as designed, but it means a hardened default in the repo is not
+the same thing as a hardened value on the hardware. Check
+`get_configs.sh?conf=system` after any flash.
 
 ### The "1 fps in Home Assistant" was not the camera
 
