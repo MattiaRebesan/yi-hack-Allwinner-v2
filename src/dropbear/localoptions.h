@@ -11,6 +11,9 @@
 #define DEFAULT_PATH "/usr/bin:/usr/sbin:/bin:/sbin:/gm/bin:/gm/tools:/tmp/sd/yi-hack/bin:/tmp/sd/yi-hack/sbin:/tmp/sd/yi-hack/usr/bin:/tmp/sd/yi-hack/usr/sbin"
 #define DEFAULT_ROOT_PATH "/usr/bin:/usr/sbin:/bin:/sbin:/gm/bin:/gm/tools:/tmp/sd/yi-hack/bin:/tmp/sd/yi-hack/sbin:/tmp/sd/yi-hack/usr/bin:/tmp/sd/yi-hack/usr/sbin"
 
-#define SFTPSERVER_PATH "/tmp/sd/yi-hack/usr/libexec/sftp-server"
+/* The sftp-server module is gone: this is a stream-only camera, there are no
+   recordings to fetch. Drop the subsystem rather than leave dropbear
+   advertising a binary that is not on the card. */
+#define DROPBEAR_SFTPSERVER 0
 
 #endif /* DROPBEAR_LOCALOPTIONS_H */

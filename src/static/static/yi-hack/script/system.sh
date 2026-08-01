@@ -289,19 +289,16 @@ export TZ=$TZ_TMP
 
 if [[ $(get_config HTTPD) == "yes" ]] ; then
     log "Starting http"
+    # /tmp/sd/record is where the stock firmware writes clips if you ever turn
+    # SAVE_VIDEO_ON_MOTION back on. It is no longer bind-mounted under www/:
+    # the recordings pages are gone, so exposing the clips over http would only
+    # be an unauthenticated read of the card.
     mkdir -p /tmp/sd/record
-    mkdir -p /tmp/sd/yi-hack/www/record
-    mount --bind /tmp/sd/record /tmp/sd/yi-hack/www/record
     httpd -p $HTTPD_PORT -h $YI_HACK_PREFIX/www/ -c /tmp/httpd.conf
 fi
 
 if [[ $(get_config TELNETD) == "no" ]] ; then
     killall telnetd
-fi
-
-if [[ $(get_config FTPD) == "yes" ]] ; then
-    log "Starting ftp"
-    $START_STOP_SCRIPT ftpd start
 fi
 
 if [[ $(get_config SSHD) == "yes" ]] ; then
@@ -400,11 +397,11 @@ fi
 if [[ $(get_config TIME_OSD) == "yes" ]] ; then
     echo "1 * * * * /tmp/sd/yi-hack/script/update_osd_tz.sh" >> /var/spool/cron/crontabs/root
 fi
+# Motion clips are written by the stock firmware, not by anything here, and
+# there is no longer a UI to delete them. This cron is the only thing keeping
+# the card from filling up if motion detection gets turned on.
 if [ "$FREE_SPACE" != "0" ]; then
     echo "0 * * * * sleep 20; /tmp/sd/yi-hack/script/clean_records.sh $FREE_SPACE" >> /var/spool/cron/crontabs/root
-fi
-if [[ $(get_config FTP_UPLOAD) == "yes" ]] ; then
-    echo "* * * * * sleep 40; /tmp/sd/yi-hack/script/ftppush.sh cron" >> /var/spool/cron/crontabs/root
 fi
 $YI_HACK_PREFIX/usr/sbin/crond -c /var/spool/cron/crontabs/
 

@@ -43,8 +43,6 @@ if [ "$ACTION" == "start" ] ; then
         $START_STOP_SCRIPT onvif start $PARAM1 $PARAM2
     elif [ "$NAME" == "wsdd" ]; then
         $START_STOP_SCRIPT wsdd start
-    elif [ "$NAME" == "ftpd" ]; then
-        $START_STOP_SCRIPT ftpd start $PARAM1
     elif [ "$NAME" == "mqtt" ]; then
         $START_STOP_SCRIPT mqtt start
     elif [ "$NAME" == "mqtt-config" ]; then
@@ -61,8 +59,6 @@ elif [ "$ACTION" == "stop" ] ; then
         $START_STOP_SCRIPT onvif stop
     elif [ "$NAME" == "wsdd" ]; then
         $START_STOP_SCRIPT wsdd stop
-    elif [ "$NAME" == "ftpd" ]; then
-        $START_STOP_SCRIPT ftpd stop
     elif [ "$NAME" == "mqtt-config" ]; then
         $START_STOP_SCRIPT mqtt-config stop
     elif [ "$NAME" == "mqtt" ]; then
@@ -79,8 +75,6 @@ elif [ "$ACTION" == "status" ] ; then
         RES=$($START_STOP_SCRIPT onvif status)
     elif [ "$NAME" == "wsdd" ]; then
         RES=$($START_STOP_SCRIPT wsdd status)
-    elif [ "$NAME" == "ftpd" ]; then
-        RES=$($START_STOP_SCRIPT ftpd status)
     elif [ "$NAME" == "mqtt" ]; then
         RES=$($START_STOP_SCRIPT mqtt status)
     elif [ "$NAME" == "mqtt-config" ]; then

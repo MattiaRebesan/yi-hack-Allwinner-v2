@@ -301,17 +301,6 @@ stop_wsdd()
     killall wsd_simple_server
 }
 
-# pure-ftpd is no longer built, so busybox is the only FTP daemon available.
-start_ftpd()
-{
-    tcpsvd -vE 0.0.0.0 21 ftpd -w >/dev/null &
-}
-
-stop_ftpd()
-{
-    killall tcpsvd
-}
-
 ps_program()
 {
     PS_PROGRAM=$(ps | grep $1 | grep -v grep | grep -c ^)
@@ -350,8 +339,6 @@ if [ "$ACTION" == "start" ] ; then
         start_onvif $PARAM1 $PARAM2
     elif [ "$NAME" == "wsdd" ]; then
         start_wsdd
-    elif [ "$NAME" == "ftpd" ]; then
-        start_ftpd $PARAM1
     elif [ "$NAME" == "mqtt" ]; then
         if [ "$HV" == "11" ] || [ "$HV" == "12" ]; then
             if [ "$MODEL_SUFFIX" != "y291ga" ] && [ "$MODEL_SUFFIX" != "y211ga" ] && [ "$MODEL_SUFFIX" != "y623" ]; then
@@ -377,7 +364,6 @@ if [ "$ACTION" == "start" ] ; then
         start_rtsp
         start_onvif
         start_wsdd
-        start_ftpd
         if [ "$HV" == "11" ] || [ "$HV" == "12" ]; then
             mqttv4 -t local > /dev/null &
         else
@@ -400,8 +386,6 @@ elif [ "$ACTION" == "stop" ] ; then
         stop_onvif
     elif [ "$NAME" == "wsdd" ]; then
         stop_wsdd
-    elif [ "$NAME" == "ftpd" ]; then
-        stop_ftpd $PARAM1
     elif [ "$NAME" == "mqtt-config" ]; then
         killall mqtt-config
     elif [ "$NAME" == "mqtt" ]; then
@@ -412,7 +396,6 @@ elif [ "$ACTION" == "stop" ] ; then
         stop_rtsp
         stop_onvif
         stop_wsdd
-        stop_ftpd
         killall mqtt-config
         killall mqttv4
         killall mp4record
@@ -424,8 +407,6 @@ elif [ "$ACTION" == "status" ] ; then
         RES=$(ps_program onvif_notify_server)
     elif [ "$NAME" == "wsdd" ]; then
         RES=$(ps_program wsd_simple_server)
-    elif [ "$NAME" == "ftpd" ]; then
-        RES=$(ps_program ftpd)
     elif [ "$NAME" == "mqtt" ]; then
         RES=$(ps_program mqttv4)
     elif [ "$NAME" == "mqtt-config" ]; then
