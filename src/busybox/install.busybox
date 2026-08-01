@@ -33,10 +33,8 @@ echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/find
 chmod 0755 ../../build/yi-hack/usr/bin/find
 echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/free
 chmod 0755 ../../build/yi-hack/usr/bin/free
-echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/ftpget
-chmod 0755 ../../build/yi-hack/usr/bin/ftpget
-echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/ftpput
-chmod 0755 ../../build/yi-hack/usr/bin/ftpput
+# No ftpget/ftpput stubs: the applets are switched off in .config, so these
+# would only be shebangs pointing at an applet busybox no longer contains.
 echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/lsof
 chmod 0755 ../../build/yi-hack/usr/bin/lsof
 echo "#!/tmp/sd/yi-hack/bin/busybox" > ../../build/yi-hack/usr/bin/mkpasswd
