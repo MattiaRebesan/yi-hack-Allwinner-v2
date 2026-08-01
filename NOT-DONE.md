@@ -293,3 +293,66 @@ It is only read by `www/cgi-bin/load.sh` (a web-UI action) and by
 `mqtt-config`. `system.sh` does not apply it on startup. So editing
 `camera.conf` on the card by hand does nothing until something triggers a load.
 Not changed — that is upstream behaviour and rewiring it is out of scope.
+
+### The watchdog was the load
+
+Measured on hardware at `0.3.6`, over SSH: load average **1.19–1.22** with the
+CPU **54.7% idle** and only 8 KB of swap touched. Those two numbers do not
+contradict each other. This camera has **one core** (`grep -c processor
+/proc/cpuinfo` = 1), and the load was not compute — it was fork churn. The
+last-PID counter in `/proc/loadavg` advanced 3085 → 6214 in 420 s, i.e. **~7.4
+new processes per second**. The run queue never emptied, so every new fork
+queued behind the others and a shell CGI took ~0.5 s on a half-idle box.
+
+A 400-sample `ps` sweep attributed the churn almost entirely to `wd.sh`:
+`sleep 10` ×368, `top -b -n 2 -d 1` ×26, `grep rRTSPServer` ×26, `awk '{print
+$8}'` ×26, `wpa_cli` ×7. The watchdog ran every 10 s, and each pass forked a
+couple of dozen short-lived processes to answer questions that nothing needs
+answered sub-minute.
+
+The expensive one was `top -b -n 2 -d 1`, used purely to read one process's
+CPU% column. It blocks a full second and walks all of `/proc` twice to do it.
+`utime+stime` from `/proc/<pid>/stat` is the same signal — if the counter has
+not moved since the previous pass, that process burned no CPU in the interval
+— for three forks and no delay.
+
+**What is not done, and why it matters:** the sleep was not left alone.
+Upstream's main loop sleeps only `if [ $COUNTER -eq 0 ]`, and the reason that
+was survivable is that `top` blocked for a second inside `check_rtsp` and
+paced the loop by accident. Removing `top` without adding a sleep turns the
+suspected-hang branch into a genuine busy-loop — a worse bug than the one
+being fixed. Hence `SUSPECT_INTERVAL=5`: still catches a locked
+`rRTSPServer` in under a minute, without spinning.
+
+Two real defects surfaced while measuring, both fixed in the same pass:
+`mqttv4` was running with `MQTT=no` in `system.conf` (upstream's `check_mqtt`
+never consults the config before restarting it), and `camera.conf` had
+`SAVE_VIDEO_ON_MOTION=yes` with `MOTION_DETECTION=no` on a build that is
+supposed to record nothing.
+
+**Not investigated further:** `rmm` sat at 34.3% CPU throughout. It is the
+closed-source Yi process that owns the sensor and feeds the frame buffer
+everything else reads, so it is not removable and not tunable from here. It is
+the floor for this hardware, not a regression.
+
+### The "1 fps in Home Assistant" was not the camera
+
+Recorded because it cost a session to chase. The stream was measured straight
+off the device: **391 frames in 20.008 s = 19.5 fps**, keyframe gaps 2.00–2.05 s
+(GOP 40), 2304×1296, 1.17 Mbps — exactly what HA's HLS segmenter wants. A 60 s
+capture of connections from the HA host returned nothing at all: HA held no
+connection to the camera while the dashboard was open.
+
+Cause: a `picture-entity` / `picture-glance` tile defaults to `camera_view:
+auto`, which renders a **still image refreshed every ~10 s**, not video. Live
+video starts only when the tile is clicked. Nothing on the camera was wrong,
+and no firmware change fixes it. The fix is one line of HA config:
+
+```yaml
+type: picture-entity
+entity: camera.yi_52f6
+camera_view: live      # default is "auto" = still image
+```
+
+For a genuinely realtime tile, `custom:webrtc-camera` with `mode: webrtc`
+passes the H.264 through without transcoding.
