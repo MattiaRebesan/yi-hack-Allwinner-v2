@@ -63,21 +63,35 @@ verify() {
         die "$ip is not serving http. Give it ~60s after power-on, then retry."
     fi
     echo "  status.json  OK"
-    echo "$status" | grep -E '"(fw_version|model_suffix|uptime|free_memory|total_memory)"' | sed 's/^/    /'
+    echo "$status" | grep -E '"(fw_version|model_suffix|uptime|free_memory|total_memory|rtsp_hb_age)"' | sed 's/^/    /'
+
+    # Snapshots and ONVIF are off by default in the Frigate-only build; only
+    # probe what the card has switched on, or a healthy camera reports FAIL.
+    local sysconf
+    sysconf=$(curl -s --max-time 15 "http://$ip/cgi-bin/get_configs.sh?conf=system" || true)
+    conf_on() { echo "$sysconf" | grep -q "\"$1\":\"yes\""; }
 
     # The \n matters: without it read hits EOF, returns 1, and set -e aborts.
     local code size
-    read -r code size < <(curl -s -o /dev/null --max-time 20 \
-        -w '%{http_code} %{size_download}\n' "http://$ip/cgi-bin/snapshot.sh" || echo "000 0")
-    if [ "$code" = "200" ] && [ "$size" -gt 10000 ]; then
-        echo "  snapshot     OK ($size bytes)"
+    if conf_on SNAPSHOT; then
+        read -r code size < <(curl -s -o /dev/null --max-time 20 \
+            -w '%{http_code} %{size_download}\n' "http://$ip/cgi-bin/snapshot.sh" || echo "000 0")
+        if [ "$code" = "200" ] && [ "$size" -gt 10000 ]; then
+            echo "  snapshot     OK ($size bytes)"
+        else
+            echo "  snapshot     FAIL (http $code, $size bytes)"; ok=1
+        fi
     else
-        echo "  snapshot     FAIL (http $code, $size bytes)"; ok=1
+        echo "  snapshot     SKIPPED (SNAPSHOT=no)"
     fi
 
-    code=$(curl -s -o /dev/null --max-time 10 -w '%{http_code}' \
-        "http://$ip/onvif/device_service" || echo 000)
-    if [ "$code" = "200" ]; then echo "  onvif        OK"; else echo "  onvif        FAIL (http $code)"; ok=1; fi
+    if conf_on ONVIF; then
+        code=$(curl -s -o /dev/null --max-time 10 -w '%{http_code}' \
+            "http://$ip/onvif/device_service" || echo 000)
+        if [ "$code" = "200" ]; then echo "  onvif        OK"; else echo "  onvif        FAIL (http $code)"; ok=1; fi
+    else
+        echo "  onvif        SKIPPED (ONVIF=no)"
+    fi
 
     if command -v ffprobe >/dev/null 2>&1; then
         local res

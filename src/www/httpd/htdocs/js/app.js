@@ -246,6 +246,13 @@ function takeSnapshot() {
     fetch('cgi-bin/snapshot.sh?res=high&watermark=yes&base64=yes', { cache: 'no-store' })
         .then(function (r) { return r.text(); })
         .then(function (b64) {
+            /* With SNAPSHOT=no imggrabber exits without a byte, and an empty
+               data: URL renders as a broken image. Say why instead. */
+            if (!b64 || !b64.replace(/\s/g, '')) {
+                img.hidden = true;
+                toast('Snapshots are off (SNAPSHOT=no in System)', true);
+                return;
+            }
             img.src = 'data:image/jpeg;base64,' + b64;
             img.hidden = false;
         })['catch'](fail);
