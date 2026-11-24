@@ -52,15 +52,31 @@ if you want a shell. `system.sh` logs a line saying so at boot rather than
 letting it look like sshd is broken.
 
 **HTTP is still unauthenticated, on purpose.** `USERNAME` and `PASSWORD` are
-empty, so `/tmp/httpd.conf` is never written and port 80 has no password —
-anything on the LAN can reach `/cgi-bin/reset.sh`, `reboot.sh`, `save.sh`,
-`speak.sh` and `load.sh`. That is a deliberate owner decision, documented with
-its reasoning in [NOT-DONE.md](NOT-DONE.md#http-authentication--left-off-deliberately).
-Put the camera on a VLAN that only Home Assistant can reach.
+empty, so `/tmp/httpd.conf` is never written and port 80 has no password.
+That is a deliberate owner decision, documented with its reasoning in
+[NOT-DONE.md](NOT-DONE.md#http-authentication--left-off-deliberately). What
+anything on the LAN can do with it, in full:
+
+- **Run commands as root, after the next reboot.** `set_configs.sh?conf=system`
+  writes any key, including `CRONTAB`, and `system.sh` copies `CRONTAB`
+  verbatim into root's crontab at boot (`echo -e "$CRONTAB" >
+  /var/spool/cron/crontabs/root`). One POST plus one `reboot.sh` is a root
+  shell.
+- **Read every stored credential in clear text.** `get_configs.sh?conf=system`
+  returns `SSH_PASSWORD` and `USERNAME`/`PASSWORD` (which are also the RTSP
+  and ONVIF credentials); `get_configs.sh?conf=mqtt` returns `MQTT_PASSWORD`;
+  `save.sh` hands out a tarball of every `*.conf` with all of the above.
+  The Wi-Fi PSK is not in any of those files, but `wifi.sh?action=save`
+  replaces the Wi-Fi network without knowing the old one.
+- Factory-reset (`reset.sh`), reboot (`reboot.sh`), overwrite every config
+  from an uploaded tarball (`load.sh`), talk through the speaker (`speak.sh`).
+
+Put the camera on a VLAN that only the Frigate host can reach.
 
 Setting `USERNAME`/`PASSWORD` closes it — but note upstream drives web, RTSP
-*and* ONVIF auth from the same pair (`system.sh:153-162`), so switching it on
-means updating Home Assistant in three places or the camera goes dark.
+*and* ONVIF auth from the same pair (`system.sh:141-150`), so switching it on
+means putting the credentials into the go2rtc URL too, or the camera goes
+dark in Frigate.
 
 ---
 

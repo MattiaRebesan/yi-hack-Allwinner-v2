@@ -101,13 +101,35 @@ first boot.
 
 **Why not:** owner's call, made with the exposure spelled out. Port 80 has no
 password, so anything on the LAN can reach `/cgi-bin/reset.sh` (factory
-reset), `reboot.sh`, `save.sh` (rewrite any config), `speak.sh` (talk through
-the speaker) and `load.sh` (read config back).
+reset), `reboot.sh`, `load.sh` (overwrite every config from an uploaded
+tarball), `save.sh` (download every config) and `speak.sh` (talk through the
+speaker). The list used to stop there and undersold it; the complete picture:
+
+- **Root command execution, deferred to the next boot.**
+  `set_configs.sh?conf=system` writes any key, `CRONTAB` included, and
+  `system.sh` writes `CRONTAB` verbatim into root's crontab at boot
+  (`echo -e "$CRONTAB" > /var/spool/cron/crontabs/root`). One POST and one
+  `reboot.sh` give a root shell. (`load.sh` reaches the same key by
+  uploading a doctored `system.conf`.)
+- **Every stored credential, in clear text.** `get_configs.sh?conf=system`
+  returns `SSH_PASSWORD` and `USERNAME`/`PASSWORD` - the latter are also the
+  RTSP and ONVIF credentials - and `conf=mqtt` returns `MQTT_PASSWORD`.
+  `save.sh` returns all of it in one tarball. The Wi-Fi PSK is not stored in
+  any of these files (checked: `wifi.sh` only writes it, to
+  `/tmp/configure_wifi.cfg`, then deletes it), but `wifi.sh?action=save`
+  moves the camera to another network without knowing the current one.
+
+Two holes that did not depend on the auth decision were closed instead:
+`camera_settings.sh` no longer `source`s `camera.conf` (a `$(...)` stored
+through `set_configs.sh?conf=camera` used to run as root on the next camera
+save), and `get_configs.sh`/`set_configs.sh` accept only `conf=system`,
+`camera`, `mqtt` and `mqtt_advertise` instead of any `../` path. Neither
+makes port 80 safe; the CRONTAB route above stays open by design.
 
 Worth knowing if that changes: upstream drives web, RTSP and ONVIF auth from
 the *same* `USERNAME`/`PASSWORD` pair (`system.sh:153-162`), so switching it on
 also puts credentials in front of the RTSP URL and the ONVIF integration —
-Home Assistant needs updating in three places or the camera goes dark. The
+the go2rtc URL in Frigate needs them too, or the camera goes dark. The
 `auth.patch` in `src/busybox/` makes a `path::` line mean "no auth for this
 path", which is how `/onvif::` stays open, so a narrower policy that protects
 only the mutating CGIs is possible if this is ever revisited.
