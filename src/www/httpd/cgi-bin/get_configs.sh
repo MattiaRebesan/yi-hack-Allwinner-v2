@@ -27,6 +27,19 @@ printf "Content-type: application/json\r\n\r\n"
 CONF_TYPE="$(get_conf_type)"
 CONF_FILE=""
 
+# Only the conf files the UI and scripts actually ask for. conf= used to be
+# pasted into a path unfiltered, so "../" reached any *.conf on the camera.
+case "$CONF_TYPE" in
+    system|camera|mqtt|mqtt_advertise) ;;
+    *)
+        # Content-type was already sent above.
+        printf "{\n"
+        printf "\"%s\":\"%s\"\\n" "error" "true"
+        printf "}"
+        exit
+        ;;
+esac
+
 if [ "$CONF_TYPE" == "mqtt" ] ; then
     CONF_FILE="$YI_HACK_PREFIX/etc/mqttv4.conf"
 else
