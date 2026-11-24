@@ -188,7 +188,7 @@ rounding error next to it.
 
 19 of 20 models were removed from `sysroot/`, `sdhack/`, `unbrick/` and the
 `CAMERAS` array. The per-model `if` branches inside `service.sh`,
-`snapshot/imggrabber.c`, `h264grabber.c`, `rRTSPServer.cpp` and
+`snapshot/imggrabber.c`, `rRTSPServer.cpp` and
 `set_tz_offset.c` were **not** touched.
 
 **Why not:** they cost a few bytes and one untaken branch. Editing them would
@@ -210,7 +210,7 @@ that is only a *whitelist*. Accepting a key nothing reads is harmless — writin
 
 **Why not:** measured free RAM is ~12.3 MB of 59.5 MB at 5 min uptime (the
 36.8 MB reading taken seconds after boot was pre-cache and not real). Swap is
-insurance against `h264grabber` being OOM-killed mid-stream. Swap-to-SD is
+insurance against `rRTSPServer` being OOM-killed mid-stream. Swap-to-SD is
 slow; a dead grabber is slower.
 
 ### `speaker` / `pcmvol` / `alsa-lib`

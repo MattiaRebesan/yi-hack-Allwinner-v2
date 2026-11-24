@@ -68,7 +68,7 @@ means updating Home Assistant in three places or the camera goes dark.
 
 | Component | Role |
 |---|---|
-| `rRTSPServer` + `h264grabber` | The stream. `rtsp://<ip>:554/ch0_0.h264` |
+| `rRTSPServer` | The stream. `rtsp://<ip>:554/ch0_0.h264` |
 | `onvif_simple_server` | ONVIF device/media/PTZ/events + WS-Discovery — how HA and Frigate find the camera |
 | `snapshot` (`imggrabber`) | JPEG stills for the ONVIF snapurl and HA camera entities |
 | `mqtt` / `mqttv4` / `mqtt-config` / wolfSSL | MQTT auto-discovery and event publishing. **This is the HA integration.** |
@@ -95,6 +95,9 @@ means updating Home Assistant in three places or the camera goes dark.
   went with them (`thumb.sh` needed `minimp4_yi`).
 - **`go2rtc`** — redundant. Home Assistant has shipped its own since 2024.11.
 - **`rtsp_server_yi`** — alternative RTSP daemon, unused at `RTSP_ALT=standard`.
+- **`h264grabber`** — dumped the shared frame buffer to a pipe for the
+  alternative RTSP daemons above. With those gone nothing ran it, yet three
+  copies (`h264grabber`, `_h`, `_l`) were still built and installed.
 - **`mosquitto`** — on-camera broker. HA owns the broker.
 - **`micropython`** — no consumers anywhere in `src/static` or `src/www`.
 - **`proxychains-ng`** — disabled by default; a cloud-region-lock workaround.
@@ -192,7 +195,7 @@ fewer SD writes, no needless transcode — not tuning the encoder.
 
 Free RAM on this build is ~12.3 MB of 59.5 MB at 5 min uptime, against
 10.9 MB on the unmodified hack. `SWAP_FILE=yes` stays on: swapping to SD is
-slow, but a `h264grabber` killed by the OOM reaper is slower.
+slow, but an `rRTSPServer` killed by the OOM reaper is slower.
 
 ---
 
