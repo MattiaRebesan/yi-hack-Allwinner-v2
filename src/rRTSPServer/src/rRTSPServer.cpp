@@ -1559,19 +1559,39 @@ int main(int argc, char** argv)
 
     sleep(2);
 
-    // Wait for stream type autodetect
-    while (1) {
-        if ((stream_type.codec_low != CODEC_NONE) && (stream_type.codec_high != CODEC_NONE)) {
+    // Wait for stream type autodetect, but only for the stream(s) this
+    // instance serves. Upstream waited for both even with -r high, so the
+    // server did not come up until a low-res SPS it would never use had gone
+    // past. Still no hard timeout - giving up would only hand the restart to
+    // wd.sh, which already restarts a server that is not listening - but a
+    // stall is now reported instead of being silent.
+    {
+        int need_low = (resolution == RESOLUTION_LOW) || (resolution == RESOLUTION_BOTH);
+        int need_high = (resolution == RESOLUTION_HIGH) || (resolution == RESOLUTION_BOTH);
+        long long wait_start = current_timestamp();
+        long long last_warn = wait_start;
+        while (1) {
+            if ((!need_low || (stream_type.codec_low != CODEC_NONE)) &&
+                    (!need_high || (stream_type.codec_high != CODEC_NONE))) {
+                usleep(10000);
+                break;
+            }
             usleep(10000);
-            break;
+            long long now = current_timestamp();
+            if (now - last_warn >= 10000) {
+                last_warn = now;
+                fprintf(stderr, "%lld: still waiting for stream autodetect after %lld s (high %s, low %s)\n",
+                        now, (now - wait_start) / 1000,
+                        !need_high ? "not served" : (stream_type.codec_high != CODEC_NONE) ? "ok" : "missing",
+                        !need_low ? "not served" : (stream_type.codec_low != CODEC_NONE) ? "ok" : "missing");
+            }
         }
-        usleep(10000);
     }
 
     if (debug) {
         fprintf(stderr, "Stream detected: high res is %s, low res is %s\n",
-                (stream_type.codec_high==CODEC_H264)?"h264":"h265",
-                (stream_type.codec_low==CODEC_H264)?"h264":"h265");
+                (stream_type.codec_high==CODEC_H264)?"h264":(stream_type.codec_high==CODEC_H265)?"h265":"none",
+                (stream_type.codec_low==CODEC_H264)?"h264":(stream_type.codec_low==CODEC_H265)?"h265":"none");
     }
 
     UserAuthenticationDatabase* authDB = NULL;
