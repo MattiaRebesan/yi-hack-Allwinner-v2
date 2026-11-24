@@ -27,7 +27,7 @@ BACKUP_ROOT="$HOME/yihack-backups"
 # Settings files that hold your data rather than defaults. Carried across a
 # flash. system.conf is handled separately: its values are merged, not copied,
 # so keys a build has removed do not come back.
-PRESERVE=(camera.conf mqttv4.conf mqtt_advertise.conf ptz_presets.conf hostname)
+PRESERVE=(camera.conf mqttv4.conf mqtt_advertise.conf hostname)
 
 RUN_ID=""
 TGZ=""
