@@ -24,6 +24,12 @@ INTERVAL=30
 SUSPECT_INTERVAL=5
 WIFI_FAILSAFE_COUNTER=0
 LAST_JIFFIES=""
+# rRTSPServer writes its uptime-in-seconds here every 5 s from inside the
+# live555 event loop (see heartbeat() in rRTSPServer.cpp). Older than
+# HB_MAX_AGE means the loop is stuck even though the process is alive and,
+# thanks to the capture thread, still burning CPU.
+HB_FILE="/tmp/rRTSPServer.hb"
+HB_MAX_AGE=20
 
 get_camera_config()
 {
@@ -39,7 +45,28 @@ get_config()
 
 restart_rtsp()
 {
+    # The heartbeat file is deliberately not removed here. The new server
+    # writes its first beat as soon as it listens, and until it listens the
+    # LISTEN check above fires first, so a stale file cannot condemn it. A
+    # removed file, on the other hand, would read as "still starting" forever
+    # if the old process survived the kill and kept port 554.
     $START_STOP_SCRIPT rtsp start
+}
+
+# Sets HB_AGE to the heartbeat's age in seconds, or -1 when there is no
+# usable heartbeat. Builtins only: read, parameter expansion, arithmetic.
+get_hb_age()
+{
+    HB_AGE=-1
+    [ -r $HB_FILE ] || return
+    read HB_T < $HB_FILE
+    read UP_T REST < /proc/uptime
+    UP_T=${UP_T%%.*}
+    case "$HB_T" in ''|*[!0-9]*) return ;; esac
+    case "$UP_T" in ''|*[!0-9]*) return ;; esac
+    HB_AGE=$((UP_T - HB_T))
+    # sysinfo() rounds up, /proc/uptime down: a fresh write can read as -1.
+    [ $HB_AGE -lt 0 ] && HB_AGE=0
 }
 
 check_rtsp()
@@ -67,6 +94,7 @@ check_rtsp()
         else
             JIFFIES=""
         fi
+        get_hb_age
 
         # The checks below are one if/elif chain on purpose: at most one
         # restart per pass. Upstream tested "not listening" and "no process"
@@ -83,6 +111,18 @@ check_rtsp()
             echo "$(date +'%Y-%m-%d %H:%M:%S') - No running processes, restarting..." >> $LOG_FILE
             killall -q rRTSPServer
             sleep 1
+            restart_rtsp
+            COUNTER=0
+        elif [ $HB_AGE -gt $HB_MAX_AGE ]; then
+            # Listening, alive, maybe even using CPU - but the event loop has
+            # not run for HB_MAX_AGE seconds, so no client is being served
+            # and no new one can connect. A missing heartbeat (HB_AGE=-1) is
+            # not treated as a hang: that is a server still starting up.
+            echo "$(date +'%Y-%m-%d %H:%M:%S') - Heartbeat ${HB_AGE}s old, event loop stuck, restarting" >> $LOG_FILE
+            killall -q rRTSPServer
+            sleep 1
+            # A wedged process may still hold port 554 after SIGTERM.
+            killall -q -9 rRTSPServer 2>/dev/null
             restart_rtsp
             COUNTER=0
         elif [ $SOCKET -gt 0 ]; then

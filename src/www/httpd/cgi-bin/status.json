@@ -12,6 +12,26 @@ SERIAL_NUMBER=$(dd bs=1 count=20 skip=36 if=/dev/$MFG_PART 2>/dev/null | tr '\0'
 LOCAL_TIME=$(date)
 UPTIME=$(cat /proc/uptime | cut -d ' ' -f1)
 LOAD_AVG=$(cat /proc/loadavg | cut -d ' ' -f1-3)
+# Age in seconds of rRTSPServer's event-loop heartbeat (see wd.sh), -1 if
+# there is none. Same arithmetic as wd.sh: the file holds the uptime of the
+# last beat, so age = uptime now - uptime then.
+RTSP_HB_AGE=-1
+if [ -r /tmp/rRTSPServer.hb ]; then
+    read HB_T < /tmp/rRTSPServer.hb
+    UP_T=${UPTIME%%.*}
+    case "$HB_T" in
+        ''|*[!0-9]*) ;;
+        *)
+            case "$UP_T" in
+                ''|*[!0-9]*) ;;
+                *)
+                    RTSP_HB_AGE=$((UP_T - HB_T))
+                    [ $RTSP_HB_AGE -lt 0 ] && RTSP_HB_AGE=0
+                    ;;
+            esac
+            ;;
+    esac
+fi
 TOTAL_MEMORY=$(free -k | awk 'NR==2{print $2}')
 FREE_MEMORY=$(free -k | awk 'NR==2{print $7}')
 FREE_SD=$(df | grep -m1 '/tmp/sd' |  grep mmc | awk '{print $5}' | tr -d '%')
@@ -45,6 +65,7 @@ printf "\"%s\":\"%s\",\n" "serial_number"   "$SERIAL_NUMBER"
 printf "\"%s\":\"%s\",\n" "local_time"      "$LOCAL_TIME"
 printf "\"%s\":\"%s\",\n" "uptime"          "$UPTIME"
 printf "\"%s\":\"%s\",\n" "load_avg"        "$LOAD_AVG"
+printf "\"%s\":%s,\n"     "rtsp_hb_age"     "$RTSP_HB_AGE"
 printf "\"%s\":\"%s\",\n" "total_memory"    "$TOTAL_MEMORY"
 printf "\"%s\":\"%s\",\n" "free_memory"     "$FREE_MEMORY"
 printf "\"%s\":\"%s\",\n" "free_sd"         "$FREE_SD"
