@@ -92,6 +92,21 @@ for ROW in $ROWS; do
             fi
         fi
     else
+        # camera.conf holds only short tokens (yes/no, low/medium/high, 30-90)
+        # and is read back by camera_settings.sh and mqtt-config, so refuse
+        # anything else rather than store it. Other confs keep free-form
+        # values: CRONTAB, passwords and MQTT topics legitimately need them.
+        if [ "$CONF_TYPE" == "camera" ]; then
+            case "$VALUE" in
+                *[!A-Za-z0-9_.-]*)
+                    printf "Content-type: application/json\r\n\r\n"
+                    printf "{\n"
+                    printf "\"%s\":\"%s\"\\n" "error" "true"
+                    printf "}"
+                    exit
+                    ;;
+            esac
+        fi
         KEY=$(echo "$KEY" | sedencode)
         VALUE=$(echo "$VALUE" | sedencode)
         sed -i "s/^\(${KEY}\s*=\s*\).*$/\1${VALUE}/" $CONF_FILE

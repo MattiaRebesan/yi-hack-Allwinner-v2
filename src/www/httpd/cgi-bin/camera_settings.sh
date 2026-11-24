@@ -7,7 +7,18 @@ HV=${HOMEVER:0:2}
 
 . $YI_HACK_PREFIX/www/cgi-bin/validate.sh
 
-source $YI_HACK_PREFIX/etc/camera.conf
+# Read the four defaults this script needs with grep, never `source`.
+# camera.conf is writable from the LAN without authentication
+# (set_configs.sh?conf=camera, load.sh), so sourcing it ran any `$(...)` or
+# backtick a value contained - as root.
+get_camera_config()
+{
+    grep "^$1=" $YI_HACK_PREFIX/etc/camera.conf | cut -d "=" -f2-
+}
+MOTION_DETECTION=$(get_camera_config MOTION_DETECTION)
+AI_HUMAN_DETECTION=$(get_camera_config AI_HUMAN_DETECTION)
+AI_VEHICLE_DETECTION=$(get_camera_config AI_VEHICLE_DETECTION)
+AI_ANIMAL_DETECTION=$(get_camera_config AI_ANIMAL_DETECTION)
 
 if ! $(validateQueryString $QUERY_STRING); then
     printf "Content-type: application/json\r\n\r\n"
