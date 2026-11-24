@@ -68,20 +68,24 @@ check_rtsp()
             JIFFIES=""
         fi
 
+        # The checks below are one if/elif chain on purpose: at most one
+        # restart per pass. Upstream tested "not listening" and "no process"
+        # independently, so a dead rRTSPServer (which is both) was killed and
+        # started twice in the same pass - the second start racing the first
+        # for port 554.
         if [ $LISTEN -eq 0 ]; then
             echo "$(date +'%Y-%m-%d %H:%M:%S') - Restarting rtsp process" >> $LOG_FILE
             killall -q rRTSPServer
             sleep 1
             restart_rtsp
-        fi
-        if [ -z "$JIFFIES" ]; then
+            COUNTER=0
+        elif [ -z "$JIFFIES" ]; then
             echo "$(date +'%Y-%m-%d %H:%M:%S') - No running processes, restarting..." >> $LOG_FILE
             killall -q rRTSPServer
             sleep 1
             restart_rtsp
             COUNTER=0
-        fi
-        if [ $SOCKET -gt 0 ]; then
+        elif [ $SOCKET -gt 0 ]; then
             # A stream is connected but the process consumed no CPU since the
             # last pass: it is serving nothing. Same condition upstream tested
             # as CPU == "0.0".
