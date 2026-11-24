@@ -102,10 +102,19 @@ check_rtsp()
             else
                 COUNTER=0
             fi
+        else
+            # No client. The lock test only means anything with a client
+            # attached, so a count started while one was connected must not
+            # survive its disconnect - otherwise COUNTER stays > 0 and the
+            # loop is stuck at SUSPECT_INTERVAL until the next restart.
+            # LAST_JIFFIES is re-based just below, so a client that connects
+            # later is measured from this pass, not from a stale sample.
+            COUNTER=0
         fi
         LAST_JIFFIES=$JIFFIES
     else
         echo "Camera is swiched off no rtsp restart needed" >> $LOG_FILE
+        COUNTER=0
     fi
 }
 
