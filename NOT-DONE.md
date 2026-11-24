@@ -1,7 +1,9 @@
 # What was deliberately not done, and why
 
 This fork strips yi-hack-Allwinner-v2 down to a single camera model (y623) used
-as a stream-only source for Home Assistant. Plenty of things looked like
+as a stream-only source for Frigate (go2rtc is the only RTSP client; Home
+Assistant watches through Frigate). It started as an HA-only build, and some
+entries below still say HA where that was the context at the time. Plenty of things looked like
 obvious cuts and turned out not to be. This file records those, so nobody —
 including a future me — re-litigates them from scratch.
 
@@ -183,7 +185,7 @@ is not a better default than leaving it off.
 
 **Why not:** `rRTSPServer` does not encode. It relays the H.264 the stock Yi
 firmware encoder already writes to shared memory. Its entire CLI is
-`-m -r -a -b -p -s -u -w -d` (`rRTSPServer.cpp:957-976`) — no bitrate, no
+`-m -r -a -b -p -s -u -w -d` (`print_usage()` in `rRTSPServer.cpp`) — no bitrate, no
 framerate, no keyframe interval.
 
 **No change in this repo can raise stream quality.** Encoder settings live in
@@ -191,15 +193,15 @@ the stock firmware, reachable only through `camera.conf` / `ipc_cmd` / the Yi
 app. "Faster" in this project means freeing the SoC, not tuning the encoder.
 
 The one thing that *did* help was `RTSP_AUDIO`: it was `yes`, which
-`rRTSPServer.cpp:1137` maps to `convertTo = WA_PCMU`, so the camera was
+the option parser in `rRTSPServer.cpp` maps to `convertTo = WA_PCMU`, so the camera was
 decoding its own AAC and re-encoding it to G.711 every frame. Now `aac`
 (passthrough). That is a CPU win on the camera and one fewer transcode in HA.
 
 ### Client-side latency
 
-Nothing on the camera competes with the HA-side setup: point go2rtc straight
-at `rtsp://<ip>:554/ch0_0.h264` and use WebRTC rather than HLS for the live
-card. That is the difference between ~2 s and sub-second. Camera-side work is
+Nothing on the camera competes with the server-side setup: go2rtc (Frigate's)
+straight at `rtsp://<ip>:554/ch0_0.h264`, and WebRTC rather than HLS for live
+views. That is the difference between ~2 s and sub-second. Camera-side work is
 rounding error next to it.
 
 ---

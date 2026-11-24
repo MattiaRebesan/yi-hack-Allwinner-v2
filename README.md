@@ -1,13 +1,20 @@
-# yi-hack-Allwinner-v2 — y623, Home Assistant only
+# yi-hack-Allwinner-v2 — y623, Frigate only
 
 A fork of [roleoroleo/yi-hack-Allwinner-v2](https://github.com/roleoroleo/yi-hack-Allwinner-v2)
 stripped down to **one camera model (y623, "Yi Pro 2K Home")** used as a
-**stream-only source for Home Assistant**.
+**stream-only source for [Frigate](https://frigate.video)**.
 
-Everything that does not serve that goal has been removed: FTP, timelapse,
-recording playback, the on-camera MQTT broker, the alternative RTSP daemons,
-micropython, proxychains. What survives exists to get one clean H.264 stream,
-ONVIF discovery, MQTT events and two-way audio into HA.
+Frigate (through its bundled go2rtc) is the **only RTSP client** and the
+source of truth for both recording and detection, on the single high-res
+stream `ch0_0.h264`. Home Assistant and phones watch the camera *through
+Frigate*, never directly. Priorities, in order: a stream that stays up, and
+the least possible load on a single-core SoC with ~60 MB of RAM on 2.4 GHz
+Wi-Fi.
+
+Everything that does not serve that goal has been removed or is off by
+default: FTP, timelapse, recording playback, the on-camera MQTT broker, the
+alternative RTSP daemons, micropython, proxychains; ONVIF, WS-Discovery,
+mDNS, snapshots and the speaker input are still built but switched off.
 
 > **Wrong camera?** This build packs `y623` only and the other 19 models have
 > been deleted from `sysroot/`, `sdhack/` and `unbrick/`. If your camera is not
@@ -25,7 +32,8 @@ break things, and a few are impossible in the first place.
 - [Security defaults that differ from upstream](#security-defaults-that-differ-from-upstream)
 - [What is still here](#what-is-still-here)
 - [What was removed](#what-was-removed)
-- [Home Assistant setup](#home-assistant-setup)
+- [Frigate](#frigate)
+- [Other clients and optional features](#other-clients-and-optional-features)
 - [What you cannot change from here](#what-you-cannot-change-from-here)
 - [Install and flash](#install-and-flash)
 - [Verify a running camera](#verify-a-running-camera)
@@ -82,18 +90,19 @@ dark in Frigate.
 
 ## What is still here
 
-| Component | Role |
-|---|---|
-| `rRTSPServer` | The stream. `rtsp://<ip>:554/ch0_0.h264` |
-| `onvif_simple_server` | ONVIF device/media/PTZ/events + WS-Discovery — how HA and Frigate find the camera |
-| `snapshot` (`imggrabber`) | JPEG stills for the ONVIF snapurl and HA camera entities |
-| `mqtt` / `mqttv4` / `mqtt-config` / wolfSSL | MQTT auto-discovery and event publishing. **This is the HA integration.** |
-| `ipc_cmd` | IR / status LED / PTZ / detection toggles, surfaced as HA switches |
-| `alsa-lib` + `speaker` + `pcmvol` | Two-way audio and TTS from HA |
-| `www` + `proccgi` + `jq` | Config UI. Cannot be removed — ONVIF's snapurl points at `cgi-bin/snapshot.sh`. |
-| `busybox` | httpd, ntpd, crond, coreutils |
-| `dropbear` | SSH |
-| `mdnsd`, `set_tz_offset`, `static` | Discovery, timezone, all config and boot scripts |
+| Component | Role | Default |
+|---|---|---|
+| `rRTSPServer` | The stream. `rtsp://<ip>:554/ch0_0.h264`. Writes an event-loop heartbeat that `wd.sh` watches. | on |
+| `www` + `proccgi` + `jq` | Config UI and `status.json` | on |
+| `busybox` | httpd, ntpd, crond, coreutils | on |
+| `dropbear` | SSH (refuses logins until `SSH_PASSWORD` is set) | on |
+| `ipc_cmd` | IR / status LED / detection toggles | on |
+| `set_tz_offset`, `static` | Timezone, all config and boot scripts | on |
+| `onvif_simple_server` | ONVIF device/media/events + WS-Discovery. No PTZ: the camera has no motors. | `ONVIF=no`, `ONVIF_WSDD=no` |
+| `snapshot` (`imggrabber`) | JPEG stills for `cgi-bin/snapshot.sh` and the ONVIF snapurl | `SNAPSHOT=no` |
+| `mqtt` / `mqttv4` / `mqtt-config` / wolfSSL | MQTT auto-discovery and event publishing | `MQTT=no` |
+| `alsa-lib` + `speaker` + `pcmvol` | Speaker input: TTS, ONVIF backchannel | `SPEAKER_AUDIO=no` |
+| `mdnsd` | mDNS announcement | `MDNSD=no` |
 
 ## What was removed
 
@@ -109,12 +118,13 @@ dark in Frigate.
   bind mount (which was an unauthenticated read of the whole card over HTTP).
 - **Timelapse** — `minimp4`, `mjpeg-avi`, `create_avi.sh`. Recording thumbnails
   went with them (`thumb.sh` needed `minimp4_yi`).
-- **`go2rtc`** — redundant. Home Assistant has shipped its own since 2024.11.
+- **`go2rtc`** — redundant. Frigate (and Home Assistant since 2024.11) ship
+  their own.
 - **`rtsp_server_yi`** — alternative RTSP daemon, unused at `RTSP_ALT=standard`.
 - **`h264grabber`** — dumped the shared frame buffer to a pipe for the
   alternative RTSP daemons above. With those gone nothing ran it, yet three
   copies (`h264grabber`, `_h`, `_l`) were still built and installed.
-- **`mosquitto`** — on-camera broker. HA owns the broker.
+- **`mosquitto`** — on-camera broker. The broker, if any, lives on the server.
 - **`micropython`** — no consumers anywhere in `src/static` or `src/www`.
 - **`proxychains-ng`** — disabled by default; a cloud-region-lock workaround.
 
@@ -122,85 +132,107 @@ Six of nine git submodules are gone, which is most of the clone time.
 
 ---
 
-## Home Assistant setup
+## Frigate
 
-### Stream
+### Why one stream
 
-Point HA's built-in go2rtc straight at the camera. Do **not** put ffmpeg or a
-transcode in front of it — the whole point is that nothing re-encodes.
+`rRTSPServer` does not encode: it relays the H.264 the stock firmware already
+wrote, so a second stream buys no quality, only a second RTSP session on a
+single-core CPU and a second copy of the video on 2.4 GHz Wi-Fi. The server
+(an i7-1280P with QuickSync) decodes the 2304x1296 stream once in hardware and
+scales it down for detection for free. So: one connection, from go2rtc, and
+Frigate records and detects from go2rtc's restream.
+
+### Config
 
 ```yaml
-# configuration.yaml
+# frigate config.yml (excerpt)
 go2rtc:
   streams:
-    yi_pro_2k: rtsp://192.168.1.20:554/ch0_0.h264#backchannel=0
+    yi_pro_2k:
+      - rtsp://192.168.1.20:554/ch0_0.h264     # the only connection to the camera
+
+cameras:
+  yi_pro_2k:
+    ffmpeg:
+      hwaccel_args: preset-intel-qsv-h264
+      inputs:
+        - path: rtsp://127.0.0.1:8554/yi_pro_2k  # go2rtc restream, not the camera
+          input_args: preset-rtsp-restream
+          roles: [record, detect]                # same stream for both
+      output_args:
+        record: preset-record-generic-audio-copy # AAC passthrough, no transcode
+    detect:
+      width: 640
+      height: 360
+      fps: 5
 ```
 
-`#backchannel=0` stops go2rtc negotiating the ONVIF backchannel on the view
-stream. Leave it off unless you actually want two-way audio on that stream, in
-which case add a second entry without the flag.
+Leave `RTSP_STREAM=high` (the default). With it, `rRTSPServer` serves only
+`ch0_0.h264`; it no longer waits for the low-res stream at start-up either.
 
-**Use WebRTC, not HLS, for the live card.** That is the difference between
-~2 s and sub-second latency, and it dwarfs anything you can change on the
-camera side.
+| URL | Served when | Contents |
+|---|---|---|
+| `rtsp://<ip>:554/ch0_0.h264` | `RTSP_STREAM=high` (default) or `both` | 2304x1296 H.264, ~20 fps, GOP 40, + AAC |
+| `rtsp://<ip>:554/ch0_1.h264` | `RTSP_STREAM=low` or `both` | 640x360 H.264 + AAC |
+| `rtsp://<ip>:554/ch0_2.h264` | `RTSP_AUDIO` is not `no` | AAC only |
 
-Available URLs:
+### Home Assistant and phones
 
-| URL | Contents |
-|---|---|
-| `rtsp://<ip>:554/ch0_0.h264` | high res, video + audio |
-| `rtsp://<ip>:554/ch0_1.h264` | low res |
-| `rtsp://<ip>:554/ch0_2.h264` | audio only |
+Through Frigate: the Frigate integration for HA, live view over go2rtc/WebRTC
+from the Frigate host. Nothing in HA talks to the camera, which keeps the
+camera at exactly one RTSP client however many dashboards are open.
 
 ### Audio
 
 `RTSP_AUDIO` is set to `aac` here, not upstream's `yes`. Upstream's `yes` maps
-to `convertTo = WA_PCMU` (`rRTSPServer.cpp:1137`), meaning the camera decodes
-the AAC its own encoder produced and re-encodes it to G.711 on every frame.
-`aac` is passthrough: less CPU on the camera, and one fewer transcode in HA,
-which takes AAC natively.
+to `convertTo = WA_PCMU` in `rRTSPServer.cpp`, meaning the camera decodes the
+AAC its own encoder produced and re-encodes it to G.711 on every frame. `aac`
+is passthrough: less CPU on the camera, and Frigate can copy it straight into
+recordings.
 
-### Snapshots
+### Watching the stream's health
 
-```
-http://<ip>/cgi-bin/snapshot.sh                        high res, no watermark
-http://<ip>/cgi-bin/snapshot.sh?res=low&watermark=yes
-```
+`cgi-bin/status.json` has `rtsp_hb_age`: seconds since `rRTSPServer`'s event
+loop last wrote its heartbeat (`/tmp/rRTSPServer.hb`, every 5 s), `-1` if
+there is none. Anything above ~20 means the loop is stuck, and `wd.sh`
+restarts the server on its next pass.
 
-Snapshots are memory-hungry on this SoC. Don't poll them on a short interval.
+## Other clients and optional features
 
-### ONVIF
+All off by default in this build (see the table above). On a card that was
+flashed before, `scripts/flash-sd.sh` **keeps the card's values** for these
+keys, so the new defaults do not apply by themselves: switch them off by hand
+in the web UI (System), or with `get_configs.sh` / `set_configs.sh`, then
+reboot. The flash script lists every key where card and build disagree.
 
-Endpoint `http://<ip>/onvif/device_service`, port 80. Discovery, PTZ and
-motion events all work. Auth is off (see above), so leave user/password empty
-in the HA ONVIF integration and in Frigate.
+- **Snapshots** (`SNAPSHOT=yes`): `http://<ip>/cgi-bin/snapshot.sh`
+  (`?res=low&watermark=yes`). Memory-hungry on this SoC; don't poll them.
+- **ONVIF** (`ONVIF=yes`, `ONVIF_WSDD=yes` for discovery): endpoint
+  `http://<ip>/onvif/device_service`, port 80. Discovery and motion events;
+  no PTZ, the camera has no motors. Auth is off, so leave user and password
+  empty in any client.
+- **MQTT** (`MQTT=yes`): the shipped `mqttv4.conf` has `MQTT_IP=0.0.0.0`, so
+  set the broker's IP first, *then* turn MQTT on. With `MQTT=no` nothing starts
+  `mqttv4`, not even `cgi-bin/service.sh`.
+- **Speak / TTS** (`SPEAKER_AUDIO=yes`): needs the speaker input fifo, and the
+  `nanotts` optional utility
+  ([yi-hack-utils](https://github.com/roleoroleo/yi-hack-utils)).
 
-### MQTT
-
-`MQTT` is left at `no` by default — the shipped `mqttv4.conf` has
-`MQTT_IP=0.0.0.0`, so enabling it out of the box just gives you a retry loop.
-Set your broker's IP in the web UI's MQTT page, *then* turn MQTT on. Entities
-appear in HA via auto-discovery.
-
-### Speak / TTS
-
-```yaml
-rest_command:
-  camera_announce:
-    url: http://192.168.1.20/cgi-bin/speak.sh?lang={{language}}&voldb={{volume}}
-    method: POST
-    payload: "{{message}}"
-```
-
-Requires the `nanotts` optional utility on the camera
-([yi-hack-utils](https://github.com/roleoroleo/yi-hack-utils)).
+  ```yaml
+  rest_command:
+    camera_announce:
+      url: http://192.168.1.20/cgi-bin/speak.sh?lang={{language}}&voldb={{volume}}
+      method: POST
+      payload: "{{message}}"
+  ```
 
 ---
 
 ## What you cannot change from here
 
 `rRTSPServer` **does not encode.** Its entire CLI is `-m -r -a -b -p -s -u -w -d`
-(`rRTSPServer.cpp:957-976`) — no bitrate, no framerate, no keyframe interval.
+(`print_usage()` in `rRTSPServer.cpp`) — no bitrate, no framerate, no keyframe interval.
 It relays H.264 that the *stock Yi firmware* encoder has already written to
 shared memory.
 
@@ -274,16 +306,18 @@ tree, extracts the new one, and carries your settings across.
 scripts/flash-sd.sh --verify 192.168.1.20
 ```
 
-Checks `status.json`, the snapshot CGI, the ONVIF endpoint, and probes the
-RTSP stream with `ffprobe` if you have it (`brew install ffmpeg`). It touches
-no card and flashes nothing.
+Checks `status.json` (including `rtsp_hb_age`), the snapshot CGI and the
+ONVIF endpoint when the card has them switched on, and probes the RTSP stream
+with `ffprobe` if you have it (`brew install ffmpeg`). It touches no card and
+flashes nothing.
 
 ```
 ==> Checking camera at 192.168.1.20
   status.json  OK
     "fw_version": "0.3.6", "model_suffix": "y623", ...
-  snapshot     OK (74213 bytes)
-  onvif        OK
+    "rtsp_hb_age":3,
+  snapshot     SKIPPED (SNAPSHOT=no)
+  onvif        SKIPPED (ONVIF=no)
   rtsp         OK (h264,2304,1296)
 ==> All checks passed.
 ```
@@ -296,8 +330,9 @@ shows no listener you did not expect.
 
 **Via GitHub Actions** (easiest, free on public repos, ~7-8 min):
 
-Push to `y623-ha`, or trigger the workflow manually — `.github/workflows/build.yaml`
-has `workflow_dispatch`. It runs `scripts/compile.sh` then `scripts/pack_fw.sh y623`
+Push to `y623-ha` (pushes to `y623-frigate` do not trigger it), or trigger the
+workflow manually on any branch — `.github/workflows/build.yaml` has
+`workflow_dispatch`. It runs `scripts/compile.sh` then `scripts/pack_fw.sh y623`
 and uploads the `.tgz` as the `build` artifact. `scripts/flash-sd.sh` downloads
 it for you.
 
@@ -311,6 +346,12 @@ scripts/build-local.sh
 `build-local.sh` builds the `Dockerfile` (the same toolchain image CI uses) and
 runs the compile inside it. Colima with `vz` + Rosetta is what makes the
 `x86_64` toolchain usable at a reasonable speed on Apple silicon.
+
+If `rRTSPServer`'s init fails with `tar: live/.../COPYING: Cannot open:
+Permission denied`, the bind mount is the problem, not the code: on colima's
+virtiofs, GNU tar cannot replace the placeholder it creates for the symlinks
+in the live555 tarball. Build on a copy inside the container instead
+(`cp -a /repo /work`, mount the repo read-only at `/repo`).
 
 ## Recovery
 

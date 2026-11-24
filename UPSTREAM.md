@@ -1,8 +1,12 @@
 # Staying in sync with upstream
 
 Upstream is [roleoroleo/yi-hack-Allwinner-v2](https://github.com/roleoroleo/yi-hack-Allwinner-v2).
-This fork lives on the `y623-ha` branch of
-[MattiaRebesan/yi-hack-Allwinner-v2](https://github.com/MattiaRebesan/yi-hack-Allwinner-v2).
+This fork lives on two branches of
+[MattiaRebesan/yi-hack-Allwinner-v2](https://github.com/MattiaRebesan/yi-hack-Allwinner-v2):
+`y623-ha` (the original Home Assistant build) and `y623-frigate`, branched
+from it, where Frigate's go2rtc is the only RTSP client and HA watches through
+Frigate. Merge upstream into `y623-ha` first, then `y623-ha` into
+`y623-frigate`; the procedure below is the same for both.
 
 ```
 origin    MattiaRebesan/yi-hack-Allwinner-v2   (this fork)
@@ -36,7 +40,7 @@ This fork deletes ~10,000 lines. Any upstream commit that touches deleted
 files produces a conflict. Two kinds:
 
 **Deleted-by-us conflicts.** Upstream edits a file this fork removed — a model
-directory, `src/go2rtc`, an events page. Resolve with `git rm`, always. Never
+directory, `src/go2rtc`, `src/h264grabber`, an events page. Resolve with `git rm`, always. Never
 take the upstream side unless you are deliberately reinstating the feature.
 
 ```bash
@@ -52,17 +56,19 @@ The full current list:
 | `scripts/common.sh` | `CAMERAS` reduced to `y623` | Keep ours. Never re-add models. |
 | `.github/workflows/build.yaml` | `pack_fw.all.sh` → `pack_fw.sh y623`; added `workflow_dispatch` | Keep ours; take any upstream toolchain/runner fixes. |
 | `.gitmodules` | 6 submodule entries removed | Keep ours. |
-| `src/static/static/yi-hack/etc/system.conf` | `TELNETD=no`, `DISABLE_CLOUD=yes`, `RTSP_AUDIO=aac`, `FREE_SPACE=15`; all `FTP_*` and `EVENTS_TIME` gone | Keep our values. Add any genuinely new upstream key, then mirror it into `check_conf.sh`. |
+| `src/static/static/yi-hack/etc/system.conf` | `TELNETD=no`, `DISABLE_CLOUD=yes`, `RTSP_AUDIO=aac`, `FREE_SPACE=15`; all `FTP_*` and `EVENTS_TIME` gone. On `y623-frigate` also `ONVIF=no`, `ONVIF_WSDD=no`, `MDNSD=no`, `SPEAKER_AUDIO=no`, `SNAPSHOT=no` | Keep our values. Add any genuinely new upstream key, then mirror it into `check_conf.sh`. |
 | `src/static/static/yi-hack/script/check_conf.sh` | Must list exactly the keys `system.conf` defines | **Always resolve in lockstep with `system.conf`.** A key in one and not the other is a real bug. |
-| `src/static/static/yi-hack/script/system.sh` | dropbear `-B` removed; empty-`SSH_PASSWORD` warning; **second-phase firmware-upgrade block and `YI_HACK_UPGRADE_PATH` removed** | Keep ours. Re-check the dropbear line by eye after every merge — it is the single most important diff in the fork. Never let the `/tmp/sd/.fw_upgrade` block back in; see [NOT-DONE.md](NOT-DONE.md#online-firmware-upgrade--removed-as-a-security-fix). |
-| `src/static/static/yi-hack/script/service.sh` | Dead `RTSP_ALT` branches for `alternative`/`go2rtc` removed; **the whole PTZ block removed** | Keep ours. The PTZ block was gated on ten model suffixes, none of them `y623` — reinstating it advertises pan/tilt over ONVIF that the hardware cannot perform. |
-| `src/static/static/yi-hack/script/wd.sh` | Watchdog no longer watches removed daemons. **Also rewritten for fork cost on a single-core CPU:** `top -b -n 2 -d 1` in `check_rtsp` replaced by `utime+stime` from `/proc/<pid>/stat`; `INTERVAL` 10 → 30; the suspected-hang branch now sleeps `SUSPECT_INTERVAL=5` instead of not sleeping at all; `check_mqtt` returns early unless `MQTT=yes`; `check_wifi` tries `ifconfig` before `wpa_cli`; single `netstat` counted twice; `grep\|grep\|grep` chains collapsed into one `awk`. | Keep ours; add upstream's new entries only for daemons that still exist here. **Four of these are not cosmetic and must not be merged away:** (1) the blocking `top` walks all of `/proc` twice and stalls the pass a full second to read one number that `/proc/<pid>/stat` gives for free — note this is a CPU-per-pass win only, **it did not change the load average**, see [NOT-DONE.md](NOT-DONE.md#the-watchdog-was-not-the-load-a-wrong-diagnosis-kept-on-record); (2) upstream's loop only sleeps when `COUNTER -eq 0` and got away with it *because* `top` blocked for a second — restoring `top` without the sleep, or removing the sleep without `top`, gives a busy-loop either way; (3) upstream's `check_mqtt` restarts `mqttv4` whether or not MQTT is enabled, which resurrects a daemon the config says is off; (4) `pidof` is not in this busybox (`CONFIG_PIDOF` is unset), so PID lookup must stay `ps` + `awk`. |
+| `src/static/static/yi-hack/script/system.sh` | dropbear `-B` removed; empty-`SSH_PASSWORD` warning; **second-phase firmware-upgrade block and `YI_HACK_UPGRADE_PATH` removed**; `service.sh mqtt start` moved inside `if MQTT=yes` | Keep ours. Re-check the dropbear line by eye after every merge — it is the single most important diff in the fork. Never let the `/tmp/sd/.fw_upgrade` block back in; see [NOT-DONE.md](NOT-DONE.md#online-firmware-upgrade--removed-as-a-security-fix). |
+| `src/static/static/yi-hack/script/service.sh` | Dead `RTSP_ALT` branches for `alternative`/`go2rtc` removed; **the whole PTZ block removed**; `mqtt`, `mqtt-config` and the MQTT half of `all` refuse to start unless `MQTT=yes` | Keep ours. The PTZ block was gated on ten model suffixes, none of them `y623` — reinstating it advertises pan/tilt over ONVIF that the hardware cannot perform. |
+| `src/static/static/yi-hack/script/wd.sh` | Watchdog no longer watches removed daemons. **Also rewritten for fork cost on a single-core CPU:** `top -b -n 2 -d 1` in `check_rtsp` replaced by `utime+stime` from `/proc/<pid>/stat`; `INTERVAL` 10 → 30; the suspected-hang branch now sleeps `SUSPECT_INTERVAL=5` instead of not sleeping at all; `check_mqtt` returns early unless `MQTT=yes`; `check_wifi` tries `ifconfig` before `wpa_cli`; single `netstat` counted twice; `grep\|grep\|grep` chains collapsed into one `awk`. | Keep ours; add upstream's new entries only for daemons that still exist here. **Four of these are not cosmetic and must not be merged away:** (1) the blocking `top` walks all of `/proc` twice and stalls the pass a full second to read one number that `/proc/<pid>/stat` gives for free — note this is a CPU-per-pass win only, **it did not change the load average**, see [NOT-DONE.md](NOT-DONE.md#the-watchdog-was-not-the-load-a-wrong-diagnosis-kept-on-record); (2) upstream's loop only sleeps when `COUNTER -eq 0` and got away with it *because* `top` blocked for a second — restoring `top` without the sleep, or removing the sleep without `top`, gives a busy-loop either way; (3) upstream's `check_mqtt` restarts `mqttv4` whether or not MQTT is enabled, which resurrects a daemon the config says is off; (4) `pidof` is not in this busybox (`CONFIG_PIDOF` is unset), so PID lookup must stay `ps` + `awk`. **On `y623-frigate`, also:** the restart checks are one `if/elif` chain (one restart per pass), `COUNTER` is reset without a client, the per-pass MTU writes are gone, and a fifth check restarts `rRTSPServer` when its heartbeat `/tmp/rRTSPServer.hb` is older than 20 s. That check reads the file and `/proc/uptime` with shell builtins because this busybox has no `stat` and no `date` (`CONFIG_STAT`, `CONFIG_DATE` unset) - do not "simplify" it to `stat -c %Y`. |
+| `src/rRTSPServer/src/rRTSPServer.cpp`, `VideoFramedMemorySource.cpp`, `AudioFramedMemorySource.cpp` (`y623-frigate`) | First `doGetNextFrame()` reschedules itself instead of spinning in `usleep()` (which froze the event loop when no frames came); `doStopGettingFrames()` unschedules the pending task; an empty frame at the queue head is popped instead of spun on; event-loop heartbeat task writing `/tmp/rRTSPServer.hb`; start-up waits only for the served stream's SPS, with a stderr warning every 10 s; capture thread copies each frame once and `std::move`s it; capture poll 20 ms. | Keep ours. If upstream rewrites these files, re-apply the non-blocking start and the heartbeat first - `wd.sh` relies on the heartbeat. |
+| `src/static/static/yi-hack/script/clean_records.sh` (`y623-frigate`) | Timelapse branch removed | Keep ours. |
 | `src/dropbear/localoptions.h` | `DROPBEAR_SFTPSERVER 0` instead of `SFTPSERVER_PATH` | Keep ours — the binary is not on the card. |
 | `src/dropbear/init.dropbear` | `--disable-harden` **kept** (upstream default) | Deliberate; see [NOT-DONE.md](NOT-DONE.md#dropbear-compiler-hardening--tried-reverted). Don't "fix" it. |
 | `src/dropbear/qemutest.dropbear` | Prints the binary's output instead of piping into `grep` | Keep ours — it is a diagnostic improvement, worth upstreaming. |
 | `src/busybox/.config` | `ftpd` / `ftpget` / `ftpput` / `tcpsvd` applets switched off | Keep ours. (`telnetd` was already off upstream — the telnet daemon on the camera is the stock one, gated by `TELNETD` in `system.conf`.) |
 | `src/busybox/install.busybox` | Stubs for those applets removed | Keep ours, and check any new stub name against `CONFIG_<NAME>=y` in `.config` — a stub for a disabled applet is a 30-byte file pointing at nothing. |
-| `src/www/httpd/**` | **Front-end rewritten from scratch.** jQuery, the `?page=` router, `js/utils.js`, all 13 `js/modules/*.js` and all 13 `htdocs/pages/*.html` are gone, replaced by one `index.html` with five `<section>` views plus `js/dom.js` + `js/app.js` (vanilla ES5). `cgi-bin/ptz.sh`, `preset.sh`, `fw_upgrade.sh` and `hostname.js` deleted; `status.json`, `camera_settings.sh` and `load.sh` pruned of PTZ. | **Always keep ours, wholesale.** There is no meaningful three-way merge between this and upstream's SPA — take upstream's file only if you are deliberately reverting the rewrite. New upstream *CGI* endpoints can be cherry-picked; new upstream *pages* cannot. |
+| `src/www/httpd/**` | On `y623-frigate` also: `camera_settings.sh` reads `camera.conf` with grep instead of `source` (root RCE), `get/set_configs.sh` whitelist `conf=`, `set_configs.sh` validates `camera.conf` values, `status.json` has `rtsp_hb_age`. **Front-end rewritten from scratch.** jQuery, the `?page=` router, `js/utils.js`, all 13 `js/modules/*.js` and all 13 `htdocs/pages/*.html` are gone, replaced by one `index.html` with five `<section>` views plus `js/dom.js` + `js/app.js` (vanilla ES5). `cgi-bin/ptz.sh`, `preset.sh`, `fw_upgrade.sh` and `hostname.js` deleted; `status.json`, `camera_settings.sh` and `load.sh` pruned of PTZ. | **Always keep ours, wholesale.** There is no meaningful three-way merge between this and upstream's SPA — take upstream's file only if you are deliberately reverting the rewrite. New upstream *CGI* endpoints can be cherry-picked; new upstream *pages* cannot. |
 | `src/onvif_simple_server/init.onvif_simple_server` | Build tweak | Take upstream unless it breaks the build. |
 | `src/static/static/yi-hack/bin/cloudAPI` | Local change | Inspect; usually keep ours. |
 
@@ -79,6 +85,10 @@ grep -rn 'fw_upgrade\|jquery\|pages/' src/www src/static/static/yi-hack/script
 ```
 
 Expect `dropbear -R -p 0.0.0.0:22` with no `-B`, and `no` / `yes` / `aac` / `15`.
+On `y623-frigate` also check that `grep -n 'mqtt start' src/static/static/yi-hack/script/system.sh`
+shows the call *inside* the `if MQTT=yes` block, and that
+`grep -n scheduleDelayedTask src/rRTSPServer/src/VideoFramedMemorySource.cpp`
+still shows the start-up retry (no `usleep` loop before the first frame).
 A merge that quietly restores `-B` gives you blank-password root SSH again and
 nothing will complain. The third grep must return nothing but comments — a hit
 in live code means the merge dragged the old front-end or the self-updater back.
