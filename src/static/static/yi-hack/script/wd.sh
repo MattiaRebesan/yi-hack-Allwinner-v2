@@ -292,8 +292,9 @@ do
     check_mqtt
     check_wifi
 
-    echo 1500 > /sys/class/net/eth0/mtu
-    echo 1500 > /sys/class/net/wlan0/mtu
+    # No MTU writes here: system.sh sets 1500 on eth0/wlan0 once at boot.
+    # Rewriting it every pass was two redundant sysfs writes (and an error
+    # on the absent eth0) per loop.
 
     # Always sleep. Upstream skipped the sleep entirely while COUNTER > 0, and
     # got away with it only because `top -b -n 2 -d 1` inside check_rtsp
