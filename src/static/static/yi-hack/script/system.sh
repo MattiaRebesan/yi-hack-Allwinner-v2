@@ -316,9 +316,11 @@ if [[ $(get_config NTPD) == "yes" ]] ; then
     sleep 5 && ntpd -p $(get_config NTP_SERVER) &
 fi
 
-log "Starting mqtt services"
-$START_STOP_SCRIPT mqtt start
+# mqttv4 used to be started above this if, unconditionally - so it ran on
+# every boot with MQTT=no, retrying a broker at MQTT_IP=0.0.0.0 forever.
 if [[ $(get_config MQTT) == "yes" ]] ; then
+    log "Starting mqtt services"
+    $START_STOP_SCRIPT mqtt start
     $START_STOP_SCRIPT mqtt-config start
     $YI_HACK_PREFIX/script/conf2mqtt.sh &
 fi

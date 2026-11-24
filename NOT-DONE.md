@@ -338,9 +338,16 @@ without blocking a second per pass on `top`, and it fixed two genuine defects
 (see below). It is a tidiness and CPU-per-pass change. **It is not a load fix,
 and the load figure is unchanged** -- do not cite it as one.
 
-One real defect surfaced while measuring and was fixed: `mqttv4` was running
-with `MQTT=no` in `system.conf`, because upstream's `check_mqtt` never
-consults the config before restarting it.
+One real defect surfaced while measuring: `mqttv4` was running with
+`MQTT=no` in `system.conf`. The fix made here was **incomplete**. It taught
+`check_mqtt` in `wd.sh` to consult the config, but the daemon never needed
+the watchdog to come back: `system.sh` ran `service.sh mqtt start` on the
+line *above* its `if MQTT=yes`, so every boot started it regardless, and
+`service.sh` itself (`mqtt`, `mqtt-config` and `all`) started it for anyone
+who asked, including `cgi-bin/service.sh` from the LAN. Now closed in all
+three places: the boot call is inside the `if`, and `service.sh` refuses to
+start `mqttv4` or `mqtt-config` unless `MQTT=yes`. Check on hardware with
+`ps | grep mqttv4` after a reboot with `MQTT=no`.
 
 **A second "defect" was not one, and the attempted fix was a bug.**
 `camera.conf` ships `SAVE_VIDEO_ON_MOTION=yes` alongside

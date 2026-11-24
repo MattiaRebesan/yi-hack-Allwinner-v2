@@ -320,6 +320,12 @@ if [ "$ACTION" == "start" ] ; then
         start_onvif $PARAM1 $PARAM2
     elif [ "$NAME" == "wsdd" ]; then
         start_wsdd
+    elif [ "$NAME" == "mqtt" ] && [[ $(get_config MQTT) != "yes" ]]; then
+        # MQTT=no means off, whoever asks: boot, the watchdog, or
+        # cgi-bin/service.sh?name=mqtt&action=start from the LAN.
+        :
+    elif [ "$NAME" == "mqtt-config" ] && [[ $(get_config MQTT) != "yes" ]]; then
+        :
     elif [ "$NAME" == "mqtt" ]; then
         if [ "$HV" == "11" ] || [ "$HV" == "12" ]; then
             if [ "$MODEL_SUFFIX" != "y291ga" ] && [ "$MODEL_SUFFIX" != "y211ga" ] && [ "$MODEL_SUFFIX" != "y623" ]; then
@@ -345,12 +351,14 @@ if [ "$ACTION" == "start" ] ; then
         start_rtsp
         start_onvif
         start_wsdd
-        if [ "$HV" == "11" ] || [ "$HV" == "12" ]; then
-            mqttv4 -t local > /dev/null &
-        else
-            mqttv4 > /dev/null &
+        if [[ $(get_config MQTT) == "yes" ]] ; then
+            if [ "$HV" == "11" ] || [ "$HV" == "12" ]; then
+                mqttv4 -t local > /dev/null &
+            else
+                mqttv4 > /dev/null &
+            fi
+            mqtt-config > /dev/null &
         fi
-        mqtt-config > /dev/null &
         cd /home/app
         if [[ $(get_config TIME_OSD) == "yes" ]] ; then
             TZP=`TZ=$TZ_TMP date +%z`
