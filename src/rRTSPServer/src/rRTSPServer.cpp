@@ -50,6 +50,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
+#include <sys/sysinfo.h>
 
 #include "rRTSPServer.h"
 
@@ -939,6 +940,37 @@ StreamReplicator* startReplicatorStream(output_queue *qBuffer, unsigned sampling
     return replicator;
 }
 
+/*
+ * Heartbeat for wd.sh. A delayed task that re-arms itself, so it only runs
+ * while the live555 event loop is turning: if anything blocks the loop, the
+ * file stops changing. The watchdog cannot see that from CPU time - the
+ * capture thread keeps burning jiffies when the loop is dead.
+ *
+ * The file holds the system uptime in seconds (same clock as /proc/uptime),
+ * so the shell can compute its age with two `read`s and no forks: the yi-hack
+ * busybox has neither `stat` nor `date`, and whether the stock one's `date`
+ * knows `+%s` is anyone's guess. It lives in /tmp (RAM), is
+ * written to a temporary name and renamed, so a reader never sees it half
+ * written, and the SD card is never touched.
+ */
+#define HEARTBEAT_FILE "/tmp/rRTSPServer.hb"
+#define HEARTBEAT_TMP_FILE "/tmp/rRTSPServer.hb.tmp"
+#define HEARTBEAT_PERIOD_US 5000000
+
+static void heartbeat(void* /*clientData*/) {
+    struct sysinfo si;
+    if (sysinfo(&si) == 0) {
+        FILE *f = fopen(HEARTBEAT_TMP_FILE, "w");
+        if (f != NULL) {
+            fprintf(f, "%ld\n", (long) si.uptime);
+            if (fclose(f) == 0) {
+                rename(HEARTBEAT_TMP_FILE, HEARTBEAT_FILE);
+            }
+        }
+    }
+    env->taskScheduler().scheduleDelayedTask(HEARTBEAT_PERIOD_US, (TaskFunc*) heartbeat, NULL);
+}
+
 static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms, char const* streamName, int audio)
 {
     char* url = rtspServer->rtspURL(sms);
@@ -1696,6 +1728,10 @@ int main(int argc, char** argv)
 
         announceStream(rtspServer, sms_audio, streamName, audio);
     }
+
+    // The server is listening and every session is registered: start the
+    // heartbeat (first write now, then every 5 s from inside the loop).
+    heartbeat(NULL);
 
     env->taskScheduler().doEventLoop(); // does not return
 

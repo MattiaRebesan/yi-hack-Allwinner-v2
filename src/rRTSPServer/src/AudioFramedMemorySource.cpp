@@ -102,6 +102,10 @@ int AudioFramedMemorySource::check_sync_word(unsigned char *str)
 }
 
 void AudioFramedMemorySource::doStopGettingFrames() {
+    // Cancel whatever doGetNextFrame() left pending (the start-up retry or a
+    // deferred afterGetting), as FramedSource's default implementation does,
+    // so no task fires on a source that has been stopped or deleted.
+    envir().taskScheduler().unscheduleDelayedTask(nextTask());
     fHaveStartedReading = False;
 }
 
@@ -120,11 +124,16 @@ void AudioFramedMemorySource::doGetNextFrame() {
     if (!fHaveStartedReading) {
         if (debug & 8) fprintf(stderr, "%lld: AudioFramedMemorySource - doGetNextFrame() 1st start\n", current_timestamp());
         pthread_mutex_lock(&(fQBuffer->mutex));
-        // Yes, I know that I should not block the event loop
-        while (fQBuffer->frame_queue.size() < 5) {
+        // Wait for 5 queued frames without blocking the event loop: if they
+        // are not there yet, come back in 10 ms through the scheduler.
+        // Upstream spun here with usleep(), so a capture thread that produced
+        // nothing froze the whole RTSP server - every session, the watchdog's
+        // heartbeat and new connections - on the first PLAY.
+        if (fQBuffer->frame_queue.size() < 5) {
             pthread_mutex_unlock(&(fQBuffer->mutex));
-            usleep(2000);
-            pthread_mutex_lock(&(fQBuffer->mutex));
+            nextTask() = envir().taskScheduler().scheduleDelayedTask(10000,
+                                 (TaskFunc*)AudioFramedMemorySource::doGetNextFrameTask, this);
+            return;
         }
         while (fQBuffer->frame_queue.size() > 5) fQBuffer->frame_queue.pop();
         pthread_mutex_unlock(&(fQBuffer->mutex));
@@ -147,9 +156,11 @@ void AudioFramedMemorySource::doGetNextFrame() {
                                  (TaskFunc*)FramedSource::afterGetting, this);
             return;
         } else if (fQBuffer->frame_queue.front().frame.size() == 0) {
+            // Drop it: it was never popped, so this loop spun on it forever
+            // with the event loop blocked.
+            fQBuffer->frame_queue.pop();
             pthread_mutex_unlock(&(fQBuffer->mutex));
             fprintf(stderr, "%lld: AudioFramedMemorySource - doGetNextFrame() error - NULL ptr\n", current_timestamp());
-            usleep(2000);
         } else if (check_sync_word(fQBuffer->frame_queue.front().frame.data()) != 1) {
             if (fQBuffer->frame_queue.size() > 0) {
                 fQBuffer->frame_queue.pop();
