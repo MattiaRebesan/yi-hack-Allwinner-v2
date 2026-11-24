@@ -245,6 +245,55 @@ TTS from HA are a streaming feature, not a recording one.
 Dropped from the plan as unnecessary: dropbear 2026.91, wolfSSL 5.8.4, jq
 1.8.1, busybox 1.36.1 are all current.
 
+### `kernel.randomize_va_space=0` — left as upstream sets it
+
+`system.sh` turns ASLR off when `KERNEL_TUNING=yes` (the default), along with
+the SD-card I/O scheduler tweaks in the same block.
+
+**Why not changed:** most of what runs on this camera is the stock Yi
+firmware - `rmm`, `cloud`, `mp4record`, the `*.so` it loads - closed-source
+binaries built for this exact kernel. Upstream disabled ASLR on purpose and
+gives no reason; the usual one on these SoCs is binaries or shared-memory
+setups that assume fixed addresses. Re-enabling it could break the very
+process that feeds the frame buffer, and there is no way to find out short of
+flashing and watching for crashes - no emulator runs `rmm`. ASLR is also a
+mitigation against memory-corruption exploits, and this camera already hands
+root to anyone on its LAN segment by design (see the HTTP entry). The cost of
+breaking the stream is real; the gain is marginal. Revisit with hardware on
+the bench, by changing only this one sysctl.
+
+### `sysroot/y623/yi-hack/fw_upgrade_in_progress` — kept
+
+An empty marker file, packed onto every card. Nothing in this repo reads it -
+no script, CGI or C source mentions the name - so whatever consults it lives
+in the stock firmware. The likely reader is the stock boot/OTA logic (the name
+suggests "do not start a firmware upgrade now"), and getting that wrong on a
+camera whose firmware is not ours to read could mean an unwanted stock OTA or
+a boot path we cannot see. It costs zero bytes. Kept until someone confirms
+the reader by disassembly or on hardware.
+
+### rRTSPServer still queues frames when nobody is watching
+
+**Proposed:** have the capture thread skip the copy into the output queue
+while no RTSP session is reading, to save a memcpy per frame on an idle
+camera.
+
+**Why not:** what was done is the safe half - the per-frame copy count went
+from three to one (build the vector in place, `std::move` it into the queue,
+hold the lock only for the push), and the capture poll went from 10 to 20 ms.
+Skipping the enqueue needs a reader count shared between the live555 thread
+(which knows about sessions) and the capture thread (which does not), and,
+harder, a guarantee that the first `doGetNextFrame()` after a client connects
+finds frames that start where a decoder can: today the queue holds the last
+20 frames continuously, and a reader joins a stream already in progress. A
+queue that restarts on connect must restart at SPS/IDR, or the client gets
+seconds of grey until the next keyframe (GOP 40 = 2 s). Getting either half
+wrong shows up as a stream that does not come back after a reconnect - the
+one failure this build exists to avoid - and none of it can be tested
+without the camera's frame buffer. Frigate keeps one session open around the
+clock anyway, so on this setup the queue is never idle and the saving is
+nil.
+
 ---
 
 ## Known rough edges
