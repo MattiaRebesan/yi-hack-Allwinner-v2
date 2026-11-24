@@ -16,24 +16,11 @@ if [ $1 -lt 1 ]; then
     exit
 fi
 
-MAX_AVI_NUMBER=10
 USED_SPACE_LIMIT=$((100-$1))
 
-if [ -d /tmp/sd/record/timelapse ]; then
-    cd /tmp/sd/record/timelapse
-    AVI_NUMBER=`ls -lr | grep .avi | awk 'END{print NR}'`
-    while [ "$AVI_NUMBER" -gt "$MAX_AVI_NUMBER" ]
-    do
-        OLD_FILE=`ls -lr | grep .avi | awk 'END{print}' | awk '{print $9}'`
-        if [ ! -z "$OLD_FILE" ]; then
-            echo "Deleting file $OLD_FILE"
-            rm -f $OLD_FILE
-            AVI_NUMBER=`ls -lr | grep .avi | awk 'END{print NR}'`
-        else
-            break
-        fi
-    done
-fi
+# Upstream pruned /tmp/sd/record/timelapse to 10 .avi files here. Timelapse
+# is gone from this build (no mjpeg-avi, no create_avi.sh), so nothing writes
+# that directory any more.
 
 if [ -d /tmp/sd/record ]; then
     cd /tmp/sd/record
