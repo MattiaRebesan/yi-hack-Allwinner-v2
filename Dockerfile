@@ -12,7 +12,7 @@ ENV SUNXI_TOOLCHAIN=/opt/yi/toolchain-sunxi-musl
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git unzip wget ca-certificates sudo build-essential \
         bison bisonc++ libbison-dev autoconf autotools-dev \
-        automake libssl-dev zlib1g-dev libzzip-dev flex libfl-dev \
+        automake libtool libssl-dev zlib1g-dev libzzip-dev flex libfl-dev \
         yui-compressor closure-compiler optipng jpegoptim libtidy5deb1 node-less \
         sassc sass-spec libhtml-tidy-perl libxml2-utils rsync qemu-user-static \
     && rm -rf /var/lib/apt/lists/*
